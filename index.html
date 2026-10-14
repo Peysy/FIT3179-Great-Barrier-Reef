@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Beneath the Surface — Great Barrier Reef</title>
+
+    <!-- Vega libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f8fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background-color: #073b4c;
+            color: white;
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        header h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            font-size: 18px;
+        }
+
+        section {
+            max-width: 1100px;
+            margin: 40px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+        }
+
+        #marine-zoning-map {
+            display: flex;
+            justify-content: center;
+            overflow-x: auto;
+        }
+
+        html { scroll-behavior: smooth; }
+        body { color: #15313b; line-height: 1.65; }
+        section { box-shadow: 0 8px 35px rgba(7,59,76,.07); }
+        h2 { color: #073b4c; font-size: 27px; }
+        h3 { color: #116779; margin-top: 36px; }
+        .intro { max-width: 830px; margin: 28px auto 0; text-align: center; padding: 0 20px; }
+        .intro p { font-size: 17px; }
+        .nav { background: #0a5262; text-align: center; padding: 13px; }
+        .nav a { color: white; text-decoration: none; margin: 0 13px; font-weight: 600; }
+        .chart { overflow-x: auto; padding: 18px 0 8px; min-height: 120px; }
+        .note { border-left: 4px solid #2b9a9c; background: #eef8f8; padding: 14px 18px; border-radius: 0 7px 7px 0; }
+        .sources { font-size: 13px; color: #49646c; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: 15px; margin: 26px 0; }
+        .stat { background: #edf7f7; border-radius: 9px; padding: 17px; }
+        .stat strong { display: block; color: #087f86; font-size: 26px; }
+        .stat span { font-size: 13px; }
+        footer { text-align: center; padding: 30px; color: #4d6770; }
+        @media(max-width:600px) { section { margin: 18px 10px; padding: 19px; } header h1 { font-size: 34px; } .nav a { display:inline-block; margin: 5px 8px; } }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Beneath the Surface</h1>
+        <p>Tourism and Environmental Change in the Great Barrier Reef</p>
+    </header>
+
+    <nav class="nav"><a href="#reef">The Reef</a><a href="#tourism">Tourism</a><a href="#environment">Environment</a><a href="#takeaways">Takeaways</a></nav>
+    <div class="intro"><p>How do people visit the reef region, and what does protecting this extraordinary ecosystem involve? Explore official tourism statistics alongside the Marine Park's zoning map.</p></div>
+    <section id="reef">
+        <h2>1. Exploring the Great Barrier Reef</h2>
+
+        <p>
+            The Great Barrier Reef Marine Park is divided into different
+            zoning categories, each designed to manage activities and
+            protect the marine environment.
+        </p>
+
+        <div id="marine-zoning-map"></div>
+    </section>
+
+    <script>
+        const mapSpec = {
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+            "width": 750,
+            "height": 650,
+
+            "title": {
+                "text": "Great Barrier Reef Marine Park Zoning",
+                "fontSize": 18
+            },
+
+            "projection": {
+                "type": "mercator",
+                "center": [148, -18],
+                "scale": 2000,
+                "translate": [430, 325]
+            },
+
+            "layer": [
+
+                // LAYER 1: Australian coastline
+                {
+                    "data": {
+                        "url": "https://vega.github.io/vega-datasets/data/world-110m.json",
+                        "format": {
+                            "type": "topojson",
+                            "feature": "countries"
+                        }
+                    },
+
+                    "transform": [
+                        {
+                            "filter": "datum.id == 36"
+                        }
+                    ],
+
+                    "mark": {
+                        "type": "geoshape",
+                        "fill": "#E5E7EB",
+                        "stroke": "#64748B",
+                        "strokeWidth": 0.7
+                    }
+                },
+
+                // LAYER 2: Great Barrier Reef zoning
+                {
+                    "data": {
+                        "url": "Desktop\FIT3179_DV2\GBR_from_your_HTML\data\Great_Barrier_Reef_Marine_Park_Zoning_vega.geojson",
+                        "format": {
+                            "type": "json",
+                            "property": "features"
+                        }
+                    },
+
+                    "mark": {
+                        "type": "geoshape",
+                        "stroke": "#FFFFFF",
+                        "strokeWidth": 0.3
+                    },
+
+                    "encoding": {
+                        "color": {
+                            "field": "properties.PART_DESC",
+                            "type": "nominal",
+                            "title": "Marine Park Zone",
+
+                            "scale": {
+                                "scheme": "tableau10"
+                            },
+
+                            "legend": {
+                                "title": "Marine Park Zone",
+                                "orient": "right",
+                                "labelLimit": 300
+                            }
+                        },
+
+                        "tooltip": [
+                            {
+                                "field": "properties.PART_DESC",
+                                "title": "Zone"
+                            },
+                            {
+                                "field": "properties.NAME",
+                                "title": "Zone Name"
+                            },
+                            {
+                                "field": "properties.IUCN",
+                                "title": "IUCN Category"
+                            }
+                        ]
+                    }
+                }
+            ],
+
+            "config": {
+                "view": {
+                    "stroke": null
+                }
+            }
+        };
+
+        vegaEmbed("#marine-zoning-map", mapSpec, {
+            actions: false
+        }).catch(console.error);
+    </script>
+    <section id="tourism">
+      <h2>2. Tourism around the Reef</h2>
+      <p>These figures describe <strong>Tropical North Queensland</strong>, a gateway region for the Great Barrier Reef. They do <strong>not</strong> count visits to the reef itself. All statistics refer to the <strong>year ending March 2026</strong>.</p>
+      <div class="stats"><div class="stat"><strong>1.75 million</strong><span>Domestic visitors</span></div><div class="stat"><strong>637,000</strong><span>International visitors</span></div><div class="stat"><strong>A$4.04 billion</strong><span>Domestic + international tourism expenditure (reported estimates)</span></div></div>
+      <h3>2.1 Who visits Tropical North Queensland?</h3>
+      <p>Domestic visitors account for the larger share of reported visitors. Hover over the bars for exact estimates.</p>
+      <div class="chart" id="visitor-chart"></div>
+      <h3>2.2 Which international markets are most prominent?</h3>
+      <p>The report highlights seven individual source countries. These are <strong>selected markets</strong>, not a complete breakdown of all international visitors.</p>
+      <div class="chart" id="origins-chart"></div>
+      <h3>2.3 Which markets grew or declined compared with 2025?</h3>
+      <p>International arrivals increased unevenly across the listed countries. The percentages compare the year ending March 2026 with the preceding year.</p>
+      <div class="chart" id="change-chart"></div>
+      <h3>2.4 How much do visitors spend?</h3>
+      <p>Domestic tourism contributes a larger total reported expenditure in this regional snapshot.</p>
+      <div class="chart" id="spend-chart"></div>
+      <h3>2.5 How do domestic tourists travel?</h3>
+      <p>The report distinguishes visitors travelling by air and by car. The two reported estimates should not be treated as a full accounting of all domestic visitors.</p>
+      <div class="chart" id="transport-chart"></div>
+      <div class="note"><strong>Reading the data:</strong> These are regional tourism estimates, not direct reef visitation counts. The international visitor figures are marked preliminary by the publisher. Do not interpret a single year as a long-term trend.</div>
+      <p class="sources">Source: Tourism Tropical North Queensland, <em>Tourism Fact File: International Visitor Survey and Domestic Tourism Statistics, year ending March 2026</em> (uploaded source infographic).</p>
+    </section>
+    <section id="environment">
+      <h2>3. Beneath the Surface: Environmental Change</h2>
+      <p>Marine Park zoning helps manage human activities, but zoning is only part of the reef's environmental story. Coral cover can also change because of marine heat stress, storms and crown-of-thorns starfish.</p>
+      <div class="note"><strong>Data integrity:</strong> A historical coral-cover chart is not included here because no verified year-by-year coral-cover dataset was supplied. Rather than invent a trend, this section identifies the monitoring evidence needed for a sound comparison.</div>
+      <p>For the environmental analysis, use the <strong>Australian Institute of Marine Science (AIMS) Long-Term Monitoring Program</strong>. A suitable next chart would compare measured hard coral cover for the Northern, Central and Southern Great Barrier Reef across consistent reporting years.</p>
+      <p class="sources">Monitoring source: <a href="https://www.aims.gov.au/research-topics/monitoring-and-discovery/monitoring-great-barrier-reef" target="_blank" rel="noopener">AIMS Great Barrier Reef monitoring</a>.</p>
+    </section>
+    <section id="takeaways">
+      <h2>4. What Does This Mean for Reef Tourism?</h2>
+      <p>The map shows how marine activities are managed across the Great Barrier Reef. The tourism charts show the importance of domestic travel and a diverse set of international visitor markets in nearby Tropical North Queensland.</p>
+      <p>These datasets alone cannot show whether tourism has caused a change in coral health. A defensible sustainability analysis would require consistent reef-level visitation measures alongside independently verified environmental monitoring data.</p>
+      <p class="sources">Zoning data: Great Barrier Reef Marine Park Authority, Marine Park Zoning GIS. Coastline: Vega world-110m / Natural Earth. Tourism: Tourism Tropical North Queensland, YE March 2026.</p>
+    </section>
+    <footer>Beneath the Surface · FIT3179 Data Visualisation</footer>
+    <script src="charts.js"></script>
+</body>
+</html>
