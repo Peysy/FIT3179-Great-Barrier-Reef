@@ -1,8 +1,8 @@
-Country,Visitors,Visitors_previous,YoY_change_pct
-United States,110000,88000,25
-Japan,99000,983000.7
-United Kingdom,82000,74300,10.3
-China,58000,37700,54
-New Zealand,39000,26900,45
-Germany,28000,20300,-14
-Canada,21000,32600,3.4
+Country,Visitors,YoY_change_pct
+United States,110000,25
+Japan,99000,7
+United Kingdom,82000,10.3
+China,58000,54
+New Zealand,39000,45
+Germany,28000,-14
+Canada,21000,3.4

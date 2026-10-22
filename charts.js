@@ -1,8 +1,450 @@
-const base={"$schema":"https://vega.github.io/schema/vega-lite/v5.json",background:null,config:{view:{stroke:null},axis:{labelFontSize:12,titleFontSize:13,gridColor:'#e5eff1'},title:{fontSize:17,color:'#073b4c'}}};
-function draw(id,spec){vegaEmbed('#'+id,{...base,...spec},{actions:false,renderer:'svg'}).catch(err=>{console.error(id,err);document.getElementById(id).textContent='Chart failed to load. Check Live Server and the browser console.';});}
-const valueTip=(field,title,fmt=',.0f')=>({field,type:'quantitative',title,format:fmt});
-draw('visitor-chart',{width:690,height:155,title:'Visitors by origin · YE March 2026',data:{url:'data/visitor_mix_2026.csv'},mark:{type:'bar',cornerRadiusEnd:5},encoding:{y:{field:'Type',type:'nominal',sort:'-x',title:null},x:{field:'Visitors',type:'quantitative',title:'Visitors',axis:{format:'~s'}},color:{field:'Type',type:'nominal',scale:{domain:['Domestic','International'],range:['#147d7c','#e3a451']},legend:null},tooltip:[{field:'Type',title:'Visitor type'},valueTip('Visitors','Visitors')]}});
-draw('origins-chart',{width:690,height:280,title:'Selected international source markets',data:{url:'data/international_origins_2026.csv'},mark:{type:'bar',color:'#147d7c',cornerRadiusEnd:4},encoding:{y:{field:'Country',type:'nominal',sort:'-x',title:null},x:{field:'Visitors',type:'quantitative',title:'Visitors',axis:{format:'~s'}},tooltip:[{field:'Country',title:'Country'},valueTip('Visitors','Visitors'),valueTip('YoY_change_pct','Change from 2025 (%)','+.1f')]}});
-draw('change-chart',{width:690,height:285,title:'International market change from 2025 (%)',data:{url:'data/international_change_2026.csv'},mark:{type:'bar',cornerRadiusEnd:3},encoding:{y:{field:'Country',type:'nominal',sort:'-x',title:null},x:{field:'Change_pct',type:'quantitative',title:'Year-on-year change (%)'},color:{condition:{test:'datum.Change_pct < 0',value:'#cb645c'},value:'#159a8c'},tooltip:[{field:'Country',title:'Country'},valueTip('Change_pct','Change (%)','+.1f')]}});
-draw('spend-chart',{width:690,height:160,title:'Tourism expenditure · YE March 2026',data:{url:'data/expenditure_2026.csv'},mark:{type:'bar',cornerRadiusEnd:5},encoding:{y:{field:'Type',type:'nominal',sort:'-x',title:null},x:{field:'AUD_billion',type:'quantitative',title:'Expenditure (A$ billion)'},color:{field:'Type',type:'nominal',scale:{domain:['Domestic','International'],range:['#147d7c','#e3a451']},legend:null},tooltip:[{field:'Type',title:'Visitor type'},valueTip('AUD_billion','A$ billion','.2f')]}});
-draw('transport-chart',{width:690,height:160,title:'Reported domestic visitors by travel mode',data:{url:'data/domestic_transport_2026.csv'},mark:{type:'bar',color:'#238f9d',cornerRadiusEnd:5},encoding:{y:{field:'Mode',type:'nominal',title:null},x:{field:'Visitors',type:'quantitative',title:'Visitors',axis:{format:'~s'}},tooltip:[{field:'Mode',title:'Mode'},valueTip('Visitors','Visitors')]}});
+const base = {
+    "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+    background: null,
+
+    config: {
+        view: {
+            stroke: null
+        },
+
+        axis: {
+            labelFontSize: 12,
+            titleFontSize: 13,
+            gridColor: '#e5eff1'
+        },
+
+        title: {
+            fontSize: 17,
+            color: '#073b4c'
+        }
+    }
+};
+
+
+function draw(id, spec) {
+
+    vegaEmbed(
+        '#' + id,
+        {
+            ...base,
+            ...spec
+        },
+        {
+            actions: false,
+            renderer: 'svg'
+        }
+    ).catch(err => {
+
+        console.error(id, err);
+
+        document.getElementById(id).textContent =
+            'Chart failed to load. Check Live Server and the browser console.';
+
+    });
+}
+
+
+const valueTip = (field, title, fmt = ',.0f') => ({
+    field: field,
+    type: 'quantitative',
+    title: title,
+    format: fmt
+});
+
+
+
+draw('visitor-chart', {
+
+    width: 690,
+    height: 155,
+
+    title: 'Visitors by origin · YE March 2026',
+
+    data: {
+        url: 'data/visitor_mix_2026.csv'
+    },
+
+    mark: {
+        type: 'bar',
+        cornerRadiusEnd: 5
+    },
+
+    encoding: {
+
+        y: {
+            field: 'Type',
+            type: 'nominal',
+            sort: '-x',
+            title: null
+        },
+
+        x: {
+            field: 'Visitors',
+            type: 'quantitative',
+            title: 'Visitors',
+
+            axis: {
+                format: '~s'
+            }
+        },
+
+        color: {
+            field: 'Type',
+            type: 'nominal',
+
+            scale: {
+                domain: [
+                    'Domestic',
+                    'International'
+                ],
+
+                range: [
+                    '#147d7c',
+                    '#e3a451'
+                ]
+            },
+
+            legend: null
+        },
+
+        tooltip: [
+            {
+                field: 'Type',
+                title: 'Visitor type'
+            },
+
+            valueTip('Visitors', 'Visitors')
+        ]
+    }
+});
+
+
+
+
+draw('origins-chart', {
+
+    width: 750,
+    height: 350,
+
+    title: 'International Visitors: 2025 vs 2026',
+
+    data: {
+        url: 'data/international_origins_2026.csv'
+    },
+
+    transform: [
+
+        // Calculate estimated 2025 visitors
+        {
+            calculate:
+                "datum.Visitors / (1 + datum.YoY_change_pct / 100)",
+            as: 'Visitors_2025'
+        },
+
+        // Convert the two columns into rows
+        {
+            fold: ['Visitors_2025', 'Visitors'],
+            as: ['Period', 'Visitor_Count']
+        },
+
+        // Assign year labels
+        {
+            calculate:
+                "datum.Period === 'Visitors_2025' ? '2025' : '2026'",
+            as: 'Year'
+        }
+    ],
+
+    encoding: {
+
+        x: {
+            field: 'Year',
+            type: 'ordinal',
+            sort: ['2025', '2026'],
+            title: 'Year',
+            axis: {
+                labelAngle: 0
+            }
+        },
+
+        y: {
+            field: 'Visitor_Count',
+            type: 'quantitative',
+            title: 'Number of Visitors',
+            scale: {
+                zero: false
+            },
+            axis: {
+                format: '~s'
+            }
+        },
+
+        color: {
+            field: 'Country',
+            type: 'nominal',
+            title: 'Country',
+
+            scale: {
+                domain: [
+                    'United States',
+                    'Japan',
+                    'United Kingdom',
+                    'China',
+                    'New Zealand',
+                    'Germany',
+                    'Canada'
+                ],
+
+                range: [
+                    '#4477AA',  
+                    '#AA66A0',  
+                    '#E6A23C',  
+                    '#55AACC',  
+                    '#8B6BB3',  
+                    '#D98A56',  
+                    '#bf5f33'   
+                ]
+            }
+        },
+
+        detail: {
+            field: 'Country',
+            type: 'nominal'
+        },
+
+        tooltip: [
+            {
+                field: 'Country',
+                type: 'nominal',
+                title: 'Country'
+            },
+            {
+                field: 'Year',
+                type: 'ordinal',
+                title: 'Year'
+            },
+            {
+                field: 'Visitor_Count',
+                type: 'quantitative',
+                title: 'Visitors (estimated for 2025)',
+                format: ',.0f'
+            }
+        ]
+    },
+
+
+layer: [
+
+    // Draw lines connecting 2025 and 2026
+    {
+        mark: {
+            type: 'line',
+            strokeWidth: 3
+        }
+    },
+
+    // Add points at both ends
+    {
+        mark: {
+            type: 'point',
+            filled: true,
+            size: 90
+        }
+    },
+    
+
+    // Add percentage change labels beside 2026
+    {
+        transform: [
+            {
+                filter: "datum.Year === '2026'"
+            },
+            {
+                calculate:
+                    "format(datum.YoY_change_pct, '+.1f') + '%'",
+                as: 'ChangeLabel'
+            }
+        ],
+
+        mark: {
+            type: 'text',
+            align: 'left',
+            baseline: 'middle',
+            dx: 12,
+            fontSize: 12,
+            fontWeight: 'bold'
+        },
+
+        encoding: {
+            text: {
+                field: 'ChangeLabel',
+                type: 'nominal'
+            }
+        }
+    }
+]
+
+});
+
+
+
+
+draw('spend-chart', {
+
+    width: 400,
+    height: 300,
+
+    title: 'Share of Tourism Expenditure',
+
+    data: {
+        url: 'data/expenditure_2026.csv'
+    },
+
+    mark: {
+        type: 'arc',
+        innerRadius: 85,
+        outerRadius: 135
+    },
+
+    encoding: {
+
+        theta: {
+            field: 'AUD_billion',
+            type: 'quantitative'
+        },
+
+        color: {
+            field: 'Type',
+            type: 'nominal',
+            title: 'Visitor Type',
+
+            scale: {
+                domain: ['Domestic', 'International'],
+                range: ['#147d7c', '#e3a451']
+            }
+        },
+
+        tooltip: [
+            { field: 'Type', type: 'nominal' },
+            {
+                field: 'AUD_billion',
+                type: 'quantitative',
+                title: 'Expenditure (A$ billion)',
+                format: '.2f'
+            }
+        ]
+    }
+});
+
+
+draw('reef-tourism-chart', {
+    width: 690,
+    height: 350,
+
+    data: {
+        url: 'data/reef_tourism_activities.csv'
+    },
+
+
+    transform: [
+        {
+            fold: [
+                'Full_day',
+                'Part_day',
+                'Scenic_flights',
+                'Coral_viewing',
+                'Exempt'
+            ],
+            as: ['Activity', 'Visits']
+        },
+        {
+            filter: "activityFilter === 'All activities' || datum.Activity === activityFilter"
+        }
+    ],
+
+    params: [
+        {
+            name: 'activityFilter',
+            value: 'All activities',
+            bind: {
+                input: 'select',
+                name: 'Explore activity: ',
+                options: [
+                    'All activities',
+                    'Full_day',
+                    'Part_day',
+                    'Scenic_flights',
+                    'Coral_viewing',
+                    'Exempt'
+                ],
+                labels: [
+                    'All activities',
+                    'Full-day visits',
+                    'Part-day visits',
+                    'Scenic flights',
+                    'Coral viewing',
+                    'Exempt visits'
+                ]
+            }
+        }
+    ],
+
+    layer: [
+        {
+            mark: {
+                type: 'line',
+                strokeWidth: 3
+            }
+        },
+        {
+            mark: {
+                type: 'point',
+                filled: true,
+                size: 100
+            }
+        }
+    ],
+
+    encoding: {
+        x: {
+            field: 'Year',
+            type: 'ordinal',
+            title: 'Financial Year'
+        },
+
+        y: {
+            field: 'Visits',
+            type: 'quantitative',
+            title: 'Number of Visits'
+        },
+
+        color: {
+            field: 'Activity',
+            type: 'nominal',
+            title: 'Tourism Activity'
+        },
+
+        
+        tooltip: [
+            {
+                field: 'Year',
+                type: 'nominal',
+                title: 'Financial Year'
+            },
+            {
+                field: 'Activity',
+                type: 'nominal',
+                title: 'Tourism Activity'
+            },
+            {
+                field: 'Visits',
+                type: 'quantitative',
+                title: 'Recorded Visits',
+                format: ','
+            }
+        ]
+
+    },
+}
+);
