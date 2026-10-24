@@ -1,0 +1,5 @@
+year,metric,value,unit,scope,note,source
+2024,reefs_aerially_surveyed,1080,reefs,GBR,Aerial survey total; not reef-level severity points,https://www.gbrmpa.gov.au/learn/reef-health/past-reef-health-updates
+2025,reefs_aerially_surveyed,258,reefs,GBR,Aerial survey total; survey coverage differs from 2024,https://www.aims.gov.au/monitoring-great-barrier-reef/gbr-condition-summary-2024-25
+2025,inshore_mid_shelf_reefs_medium_to_high_bleaching,41,percent,162 inshore and mid-shelf reefs surveyed,"Denominator 162, not all 258 reefs",https://www.aims.gov.au/monitoring-great-barrier-reef/gbr-condition-summary-2024-25
+2025,all_surveyed_reefs_very_high_bleaching,9,percent,258 reefs surveyed,Very high bleaching prevalence; not a percentage of coral cover,https://www.aims.gov.au/monitoring-great-barrier-reef/gbr-condition-summary-2024-25

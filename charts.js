@@ -53,6 +53,109 @@ const valueTip = (field, title, fmt = ',.0f') => ({
 });
 
 
+draw('marine-zoning-map', {
+
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+            "width": 750,
+            "height": 650,
+
+            "title": {
+                "text": "Great Barrier Reef Marine Park Zoning",
+                "fontSize": 18
+            },
+
+            "projection": {
+                "type": "mercator",
+                "center": [148, -18],
+                "scale": 2000,
+                "translate": [430, 325]
+            },
+
+            "layer": [
+
+                // LAYER 1: Australian coastline
+                {
+                    "data": {
+                        "url": "https://vega.github.io/vega-datasets/data/world-110m.json",
+                        "format": {
+                            "type": "topojson",
+                            "feature": "countries"
+                        }
+                    },
+
+                    "transform": [
+                        {
+                            "filter": "datum.id == 36"
+                        }
+                    ],
+
+                    "mark": {
+                        "type": "geoshape",
+                        "fill": "#E5E7EB",
+                        "stroke": "#64748B",
+                        "strokeWidth": 0.7
+                    }
+                },
+
+                // LAYER 2: Great Barrier Reef zoning
+                {
+                    "data": {
+                        "url": "data/Great_Barrier_Reef_Marine_Park_Zoning_vega.geojson",
+                        "format": {
+                            "type": "json",
+                            "property": "features"
+                        }
+                    },
+
+                    "mark": {
+                        "type": "geoshape",
+                        "stroke": "#FFFFFF",
+                        "strokeWidth": 0.3
+                    },
+
+                    "encoding": {
+                        "color": {
+                            "field": "properties.PART_DESC",
+                            "type": "nominal",
+                            "title": "Marine Park Zone",
+
+                            "scale": {
+                                "scheme": "tableau10"
+                            },
+
+                            "legend": {
+                                "title": "Marine Park Zone",
+                                "orient": "right",
+                                "labelLimit": 300
+                            }
+                        },
+
+                        "tooltip": [
+                            {
+                                "field": "properties.PART_DESC",
+                                "title": "Zone"
+                            },
+                            {
+                                "field": "properties.NAME",
+                                "title": "Zone Name"
+                            },
+                            {
+                                "field": "properties.IUCN",
+                                "title": "IUCN Category"
+                            }
+                        ]
+                    }
+                }
+            ],
+
+            "config": {
+                "view": {
+                    "stroke": null
+                }
+            }
+        }
+    );
 
 draw('visitor-chart', {
 
@@ -448,3 +551,7 @@ draw('reef-tourism-chart', {
     },
 }
 );
+
+draw('zone-explorer-map', {
+    
+})
