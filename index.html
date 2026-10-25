@@ -69,9 +69,9 @@
         footer { text-align: center; padding: 30px; color: #4d6770; }
         @media(max-width:600px) { section { margin: 18px 10px; padding: 19px; } header h1 { font-size: 34px; } .nav a { display:inline-block; margin: 5px 8px; } }
     </style>
-</head>
+    </head>
 
-<body>
+    <body>
 
     <header>
         <h1>Beneath the Surface</h1>
@@ -95,28 +95,61 @@
 
     </script>
     <section id="tourism">
-      <h2>2. Tourism around the Reef</h2>
-      <p>These figures describe <strong>Tropical North Queensland</strong>, a gateway region for the Great Barrier Reef. They do <strong>not</strong> count visits to the reef itself. All statistics refer to the <strong>year ending March 2026</strong>.</p>
-      <div class="stats"><div class="stat"><strong>1.75 million</strong><span>Domestic visitors</span></div><div class="stat"><strong>637,000</strong><span>International visitors</span></div><div class="stat"><strong>A$4.04 billion</strong><span>Domestic + international tourism expenditure (reported estimates)</span></div></div>
-      <h3>2.1 Who visits Tropical North Queensland?</h3>
-      <p>Domestic visitors account for the larger share of reported visitors. Hover over the bars for exact estimates.</p>
-      <div class="chart" id="visitor-chart"></div>
-      <h3>2.2 Which international markets are most prominent and how have their numbers changed?</h3>
-      <p>The report highlights seven individual source countries and how their numbers have changed from 2025. These are <strong>selected markets</strong>, not a complete breakdown of all international visitors.</p>
-      <div class="chart" id="origins-chart"></div>
-      <p>International arrivals increased unevenly across the listed countries. The percentages compare the year ending March 2026 with the preceding year.</p>
-      <h3>2.4 How much do visitors spend?</h3>
-      <p>Domestic tourism contributes a larger total reported expenditure in this regional snapshot.</p>
-      <div class="chart" id="spend-chart"></div>
-      <h3>2.5 How Tourists Experience the Reef</h3>
-      <p>Tourism at the Great Barrier Reef includes full-day and part-day visits, coral-viewing excursions and scenic flights. Explore how these activities have changed over time.</p>
-      <div class="chart" id="reef-tourism-chart"></div>
-      <div class="note">
-      <strong>Reading the data:</strong>These figures represent recorded commercial reef tourism activities, not necessarily unique tourists. The categories may use different counting definitions.</div>
-      <p class="sources">Source: Australian Bureau of Statistics, Great Barrier Reef Ecosystem Accounts, 2010–11 to 2022–23.</p> 
-      Source: Australian Bureau of Statistics, Great Barrier Reef Ecosystem Accounts (2026). Figures represent recorded commercial visits, not necessarily unique tourists.</p>
-      <h3>Explore Marine Park Zones</h3>
-      <p>Select a zone to explore where different protection categories are located along the Great Barrier Reef.</p>
+        <h2>2. Tourism around the Reef</h2>
+        <p>These figures describe <strong>Tropical North Queensland</strong>, a gateway region for the Great Barrier Reef. They do <strong>not</strong> count visits to the reef itself. All statistics refer to the <strong>year ending March 2026</strong>.</p>
+        <div class="stats"><div class="stat"><strong>1.75 million</strong><span>Domestic visitors</span></div><div class="stat"><strong>637,000</strong><span>International visitors</span></div><div class="stat"><strong>A$4.04 billion</strong><span>Domestic + international tourism expenditure (reported estimates)</span></div></div>
+        <h3>2.1 Who visits Tropical North Queensland?</h3>
+        <p>Domestic visitors account for the larger share of reported visitors. Hover over the bars for exact estimates.</p>
+        <div class="chart" id="visitor-chart"></div>
+        <h3>2.2 Which international markets are most prominent and how have their numbers changed?</h3>
+        <p>The report highlights seven individual source countries and how their numbers have changed from 2025. These are <strong>selected markets</strong>, not a complete breakdown of all international visitors.</p>
+        <div class="chart" id="origins-chart"></div>
+        <p>International arrivals increased unevenly across the listed countries. The percentages compare the year ending March 2026 with the preceding year.</p>
+        <h3>2.4 How much do visitors spend?</h3>
+        <p>Domestic tourism contributes a larger total reported expenditure in this regional snapshot.</p>
+        <div class="chart" id="spend-chart"></div>
+
+    </section>
+
+    <section id="GBR and tourism meet">
+        <h3>3. How Tourists Experience the Reef</h3>
+        <p>Tourism at the Great Barrier Reef includes full-day and part-day visits, coral-viewing excursions and scenic flights. Explore how these activities have changed over time.</p>
+        <div class="chart" id="reef-tourism-chart"></div>
+        <div class="note">
+        <strong>Reading the data:</strong>These figures represent recorded commercial reef tourism activities, not necessarily unique tourists. The categories may use different counting definitions.</div>
+        <p class="sources">Source: Australian Bureau of Statistics, Great Barrier Reef Ecosystem Accounts, 2010–11 to 2022–23.</p> 
+        Source: Australian Bureau of Statistics, Great Barrier Reef Ecosystem Accounts (2026). Figures represent recorded commercial visits, not necessarily unique tourists.</p>
+        <h3>Explore Marine Park Zones</h3>
+        <p>Select a zone to explore where different protection categories are located along the Great Barrier Reef.</p>
+        <h3>When Tourism Meets the Reef</h3>
+
+        <p>
+            Recreational diving and snorkelling can result in physical
+            contact with reef organisms. This visualisation examines
+            observed reef interactions across international dive sites.
+        </p>
+
+        <div id="diver-impact-chart"></div>
+
+        <p class="note">
+            Source: DiverReef dataset (observations from 2004–2023).
+            These observations are international and are not specific
+            to the Great Barrier Reef.
+        </p>
+
+        <h3>Where Were Reef Interactions Recorded?</h3>
+
+        <p>
+            Explore the geographical distribution of observed reef
+            interactions across international diving and snorkelling sites.
+        </p>
+
+        <div id="diver-impact-map"></div>
+
+        <p class="note">
+            Source: DiverReef. International observations collected
+            between 2004 and 2023. Not specific to the Great Barrier Reef.
+        </p>
 
 <div class="chart" id="zone-explorer-map"></div>
 

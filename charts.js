@@ -121,7 +121,31 @@ draw('marine-zoning-map', {
                             "title": "Marine Park Zone",
 
                             "scale": {
-                                "scheme": "tableau10"
+                                "domain": [
+                                    "Buffer Zone",
+                                    "Commonwealth Islands Zone (GBRMPA)",
+                                    "Commonwealth Islands Zone (Other)",
+                                    "Conservation Park Zone",
+                                    "General Use Zone",
+                                    "Habitat Protection Zone",
+                                    "Marine National Park Zone",
+                                    "Preservation Zone",
+                                    "Scientific Research Zone",
+                                    "Scientific Research Zone (closed to public access)"
+                                ],
+
+                                "range": [
+                                    "#4E79A7",  // Buffer - Blue
+                                    "#F28E2B",  // Commonwealth Islands (GBRMPA) - Orange
+                                    "#E15759",  // Commonwealth Islands (Other) - Coral
+                                    "#76B7B2",  // Conservation Park - Teal
+                                    "#B07AA1",  // General Use - Purple
+                                    "#EDC948",  // Habitat Protection - Yellow
+                                    "#9C755F",  // Marine National Park - Brown
+                                    "#FF9DA7",  // Preservation - Pink
+                                    "#6B6ECF",  // Scientific Research - Indigo
+                                    "#BAB0AC"   // Scientific Research (closed) - Grey
+                                ]
                             },
 
                             "legend": {
@@ -551,6 +575,233 @@ draw('reef-tourism-chart', {
     },
 }
 );
+
+
+draw('diver-impact-chart', {
+  title: 'Reef Contact and Damage by Activity',
+
+  width: 650,
+  height: 300,
+
+  data: {
+    url: 'data/DiverReef_cleaned.csv'
+  },
+
+  transform: [
+    {
+      filter:
+        "isValid(datum.contact_per_10min) && " +
+        "isValid(datum.damage_per_10min)"
+    },
+    {
+      fold: [
+        'contact_per_10min',
+        'damage_per_10min'
+      ],
+      as: ['Interaction', 'Rate']
+    },
+    {
+      calculate:
+        "datum.Interaction === 'contact_per_10min' " +
+        "? 'Physical contact' : 'Recorded damage'",
+      as: 'InteractionType'
+    }
+  ],
+
+  mark: 'bar',
+
+  encoding: {
+    x: {
+      field: 'activity',
+      type: 'nominal',
+      title: 'Activity'
+    },
+
+    xOffset: {
+      field: 'InteractionType'
+    },
+
+    y: {
+      aggregate: 'mean',
+      field: 'Rate',
+      type: 'quantitative',
+      title: 'Average interactions per 10 minutes'
+    },
+
+    color: {
+      field: 'InteractionType',
+      type: 'nominal',
+      title: 'Interaction'
+    },
+
+    tooltip: [
+      { field: 'activity', title: 'Activity' },
+      { field: 'InteractionType', title: 'Interaction' },
+      {
+        aggregate: 'mean',
+        field: 'Rate',
+        title: 'Average per 10 minutes',
+        format: '.2f'
+      }
+    ]
+  }
+});
+
+
+draw('diver-impact-map', {
+  title: 'Reef Contact Rates Across International Dive Sites',
+
+  width: 750,
+  height: 420,
+
+  projection: {
+    type: 'equalEarth'
+  },
+
+    params: [
+    {
+        name: 'metricFilter',
+        value: 'contactRate',
+        bind: {
+        input: 'select',
+        options: ['contactRate', 'damageRate'],
+        labels: ['Reef contact rate', 'Reef damage rate'],
+        name: 'Show: '
+        }
+    }
+    ],
+
+  layer: [
+    // World map background
+    {
+      data: {
+        url: 'https://cdn.jsdelivr.net/npm/vega-datasets@2/data/world-110m.json',
+        format: {
+          type: 'topojson',
+          feature: 'countries'
+        }
+      },
+
+      mark: {
+        type: 'geoshape',
+        fill: '#e8eef0',
+        stroke: '#ffffff',
+        strokeWidth: 0.5
+      }
+    },
+
+    // Dive-site points
+    {
+  data: {
+    url: 'data/DiverReef_map_sites.csv',
+    format: {
+      type: 'csv'
+    }
+  },
+
+  transform: [
+    {
+      calculate: 'toNumber(datum.latitude)',
+      as: 'lat'
+    },
+    {
+      calculate: 'toNumber(datum.longitude)',
+      as: 'lon'
+    },
+    {
+      calculate: 'toNumber(datum.avg_contacts_per_10min)',
+      as: 'contactRate'
+    },
+    {
+      calculate: 'toNumber(datum.avg_damage_per_10min)',
+      as: 'damageRate'
+    },
+    {
+      calculate:
+        "metricFilter === 'contactRate' " +
+        "? datum.contactRate : datum.damageRate",
+      as: 'selectedRate'
+    },
+    {
+      calculate: 'toNumber(datum.observations)',
+      as: 'sampleSize'
+    },
+    {
+      filter:
+        'isValid(datum.lat) && ' +
+        'isValid(datum.lon) && ' +
+        'isValid(datum.contactRate) && ' +
+        'isFinite(datum.contactRate) && ' +
+        'datum.contactRate >= 0'
+    }
+  ],
+
+  mark: {
+    type: 'circle',
+    color: '#0077b6',
+    opacity: 0.65,
+    stroke: '#ffffff',
+    strokeWidth: 1
+  },
+
+  encoding: {
+    longitude: {
+      field: 'lon',
+      type: 'quantitative'
+    },
+
+    latitude: {
+      field: 'lat',
+      type: 'quantitative'
+    },
+
+        size: {
+        field: 'selectedRate',
+        type: 'quantitative',
+        title: 'Interactions per 10 min',
+        scale: {
+            type: 'linear',
+            domainMin: 0,
+            range: [30, 1800]
+        }
+    },
+
+      legend: {
+        orient: 'right',
+        titleLimit: 180,
+        symbolFillColor: '#0077b6',
+        symbolFillOpacity: 0.65
+      }
+    },
+
+    tooltip: [
+      { field: 'country', title: 'Country' },
+      { field: 'site', title: 'Dive site' },
+      { field: 'activity', title: 'Activity' },
+      {
+        field: 'contactRate',
+        type: 'quantitative',
+        title: 'Contacts per 10 min',
+        format: '.2f'
+      },
+      {
+        field: 'damageRate',
+        type: 'quantitative',
+        title: 'Damage per 10 min',
+        format: '.2f'
+      },
+      {
+        field: 'sampleSize',
+        type: 'quantitative',
+        title: 'Observations',
+        format: ',.0f'
+      }
+    ]
+  }
+    
+  ]
+});
+
 
 draw('zone-explorer-map', {
     
