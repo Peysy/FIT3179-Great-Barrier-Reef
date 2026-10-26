@@ -22,26 +22,27 @@ const base = {
 };
 
 
+const chartViews = {};
+
 function draw(id, spec) {
+  return vegaEmbed(
+    '#' + id,
+    { ...base, ...spec },
+    { actions: false, renderer: 'svg' }
+  )
+  .then(result => {
+    chartViews[id] = result.view;
+    return result;
+  })
+  .catch(err => {
+    console.error(id, err);
 
-    vegaEmbed(
-        '#' + id,
-        {
-            ...base,
-            ...spec
-        },
-        {
-            actions: false,
-            renderer: 'svg'
-        }
-    ).catch(err => {
+    const container = document.getElementById(id);
 
-        console.error(id, err);
-
-        document.getElementById(id).textContent =
-            'Chart failed to load. Check Live Server and the browser console.';
-
-    });
+    if (container) {
+      container.textContent = 'Chart failed to load.';
+    }
+  });
 }
 
 
@@ -53,11 +54,11 @@ const valueTip = (field, title, fmt = ',.0f') => ({
 });
 
 
-draw('marine-zoning-map', {
+draw('marine-zoning-map-colour', {
 
             "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
 
-            "width": 750,
+            "width": 950,
             "height": 650,
 
             "title": {
@@ -181,9 +182,100 @@ draw('marine-zoning-map', {
         }
     );
 
+draw('marine-zoning-map', {
+
+            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+
+            "width": 1050,
+            "height": 550,
+
+            "title": {
+                "text": "Great Barrier Reef Marine Park Zoning",
+                "fontSize": 18
+            },
+
+            "projection": {
+                "type": "mercator",
+                "center": [148, -18],
+                "scale": 2000,
+                "translate": [430, 325]
+            },
+
+            "layer": [
+
+                // LAYER 1: Australian coastline
+                {
+                    "data": {
+                        "url": "https://vega.github.io/vega-datasets/data/world-110m.json",
+                        "format": {
+                            "type": "topojson",
+                            "feature": "countries"
+                        }
+                    },
+
+                    "transform": [
+                        {
+                            "filter": "datum.id == 36"
+                        }
+                    ],
+
+                    "mark": {
+                        "type": "geoshape",
+                        "fill": "#E5E7EB",
+                        "stroke": "#64748B",
+                        "strokeWidth": 0.7
+                    }
+                },
+
+                // LAYER 2: Great Barrier Reef zoning
+                {
+                    "data": {
+                        "url": "data/Great_Barrier_Reef_Marine_Park_Zoning_vega.geojson",
+                        "format": {
+                            "type": "json",
+                            "property": "features"
+                        }
+                    },
+
+                    "mark": {
+                        "type": "geoshape",
+                        "fill": "#1ac9e8",
+                        "stroke": "#e6edf8",
+                        "strokeWidth": 0.7
+                    },
+
+                    "encoding": {
+
+
+                        "tooltip": [
+                            {
+                                "field": "properties.PART_DESC",
+                                "title": "Zone"
+                            },
+                            {
+                                "field": "properties.NAME",
+                                "title": "Zone Name"
+                            },
+                            {
+                                "field": "properties.IUCN",
+                                "title": "IUCN Category"
+                            }
+                        ]
+                    }
+                }
+            ],
+
+            "config": {
+                "view": {
+                    "stroke": null
+                }
+            }
+        }
+    );
+
 draw('visitor-chart', {
 
-    width: 690,
+    width: 985,
     height: 155,
 
     title: 'Visitors by origin · YE March 2026',
@@ -251,7 +343,7 @@ draw('visitor-chart', {
 
 draw('origins-chart', {
 
-    width: 750,
+    width: 900,
     height: 350,
 
     title: 'International Visitors: 2025 vs 2026',
@@ -416,165 +508,237 @@ layer: [
 
 
 
+draw('reef-economy-chart', {
 
-draw('spend-chart', {
-
-    width: 400,
-    height: 300,
-
-    title: 'Share of Tourism Expenditure',
-
-    data: {
-        url: 'data/expenditure_2026.csv'
+  title: {
+    text: 'Economic Importance of Great Barrier Reef Tourism (2023–24)',
+    anchor: 'middle',
+    fontSize: 18,
+    color: '#073b4c',
+    offset: 15
     },
 
+  data: {
+    url: 'data/GBR_tourism_economy_and_jobs.csv'
+    },
+
+  transform: [
+    {
+      fold: [
+        'value_aud_billion',
+        'jobs_supported_fte'
+      ],
+      as: ['Metric', 'Value']
+    },
+    {
+      calculate:
+        "datum.Metric === 'value_aud_billion' ? " +
+        "'Economic Contribution (A$ Billion)' : " +
+        "'Jobs Supported (FTE)'",
+      as: 'MetricLabel'
+    }
+  ],
+
+  facet: {
+    column: {
+      field: 'MetricLabel',
+      type: 'nominal',
+      title: null,
+      sort: [
+        'Economic Contribution (A$ Billion)',
+        'Jobs Supported (FTE)'
+      ]
+    }
+  },
+
+  spec: {
+    width: 495,
+    height: 220,
+
     mark: {
-        type: 'arc',
-        innerRadius: 85,
-        outerRadius: 135
+      type: 'bar',
+      cornerRadiusEnd: 5
     },
 
     encoding: {
+      y: {
+        field: 'geography',
+        type: 'nominal',
+        title: null,
+        sort: ['Australia', 'Queensland', 'GBR region']
+      },
 
-        theta: {
-            field: 'AUD_billion',
-            type: 'quantitative'
+      x: {
+        field: 'Value',
+        type: 'quantitative',
+        title: null
+      },
+
+      color: {
+        field: 'MetricLabel',
+        type: 'nominal',
+        legend: null,
+        scale: {
+          domain: [
+            'Economic Contribution (A$ Billion)',
+            'Jobs Supported (FTE)'
+          ],
+          range: ['#168AAD', '#A78BFA']
+        }
+      },
+
+      tooltip: [
+        {
+          field: 'geography',
+          title: 'Geography'
         },
-
-        color: {
-            field: 'Type',
-            type: 'nominal',
-            title: 'Visitor Type',
-
-            scale: {
-                domain: ['Domestic', 'International'],
-                range: ['#147d7c', '#e3a451']
-            }
+        {
+          field: 'MetricLabel',
+          title: 'Metric'
         },
-
-        tooltip: [
-            { field: 'Type', type: 'nominal' },
-            {
-                field: 'AUD_billion',
-                type: 'quantitative',
-                title: 'Expenditure (A$ billion)',
-                format: '.2f'
-            }
-        ]
+        {
+          field: 'Value',
+          title: 'Value',
+          format: ',.2f'
+        }
+      ]
     }
+  },
+
+  resolve: {
+    scale: {
+      x: 'independent'
+    }
+  }
 });
 
 
 draw('reef-tourism-chart', {
-    width: 690,
-    height: 350,
+  width: 860,
+  height: 440,
 
-    data: {
-        url: 'data/reef_tourism_activities.csv'
+  data: {
+    url: 'data/reef_tourism_activities.csv'
+  },
+
+  // Vega-Lite automatically creates the dropdown
+  params: [
+    {
+      name: 'selectedActivity',
+      value: 'All',
+      bind: {
+        input: 'select',
+        options: [
+          'All',
+          'Full_day',
+          'Part_day',
+          'Coral_viewing',
+          'Scenic_flights',
+          'Exempt'
+        ],
+        labels: [
+          'All activities',
+          'Full-day visits',
+          'Part-day visits',
+          'Coral viewing',
+          'Scenic flights',
+          'Exempt'
+        ],
+        name: 'Explore activity: '
+      }
+    }
+  ],
+
+  transform: [
+    {
+      fold: [
+        'Full_day',
+        'Part_day',
+        'Scenic_flights',
+        'Coral_viewing',
+        'Exempt'
+      ],
+      as: ['Activity', 'Visits']
+    },
+    {
+      calculate: 'toNumber(datum.Visits)',
+      as: 'VisitCount'
+    },
+    {
+      filter: "selectedActivity === 'All' || datum.Activity === selectedActivity"
+    }
+  ],
+
+  mark: {
+    type: 'line',
+    point: {
+      filled: true,
+      size: 75
+    },
+    strokeWidth: 3
+  },
+
+  encoding: {
+    x: {
+      field: 'Year',
+      type: 'ordinal',
+      title: 'Financial Year',
+      axis: {
+        labelAngle: -90
+      }
     },
 
+    y: {
+      field: 'VisitCount',
+      type: 'quantitative',
+      title: 'Number of Visits',
+      axis: {
+        format: ','
+      }
+    },
 
-    transform: [
-        {
-            fold: [
-                'Full_day',
-                'Part_day',
-                'Scenic_flights',
-                'Coral_viewing',
-                'Exempt'
-            ],
-            as: ['Activity', 'Visits']
-        },
-        {
-            filter: "activityFilter === 'All activities' || datum.Activity === activityFilter"
-        }
-    ],
-
-    params: [
-        {
-            name: 'activityFilter',
-            value: 'All activities',
-            bind: {
-                input: 'select',
-                name: 'Explore activity: ',
-                options: [
-                    'All activities',
-                    'Full_day',
-                    'Part_day',
-                    'Scenic_flights',
-                    'Coral_viewing',
-                    'Exempt'
-                ],
-                labels: [
-                    'All activities',
-                    'Full-day visits',
-                    'Part-day visits',
-                    'Scenic flights',
-                    'Coral viewing',
-                    'Exempt visits'
-                ]
-            }
-        }
-    ],
-
-    layer: [
-        {
-            mark: {
-                type: 'line',
-                strokeWidth: 3
-            }
-        },
-        {
-            mark: {
-                type: 'point',
-                filled: true,
-                size: 100
-            }
-        }
-    ],
-
-    encoding: {
-        x: {
-            field: 'Year',
-            type: 'ordinal',
-            title: 'Financial Year'
-        },
-
-        y: {
-            field: 'Visits',
-            type: 'quantitative',
-            title: 'Number of Visits'
-        },
-
-        color: {
-            field: 'Activity',
-            type: 'nominal',
-            title: 'Tourism Activity'
-        },
-
-        
-        tooltip: [
-            {
-                field: 'Year',
-                type: 'nominal',
-                title: 'Financial Year'
-            },
-            {
-                field: 'Activity',
-                type: 'nominal',
-                title: 'Tourism Activity'
-            },
-            {
-                field: 'Visits',
-                type: 'quantitative',
-                title: 'Recorded Visits',
-                format: ','
-            }
+    color: {
+      field: 'Activity',
+      type: 'nominal',
+      title: 'Tourism Activity',
+      scale: {
+        domain: [
+          'Coral_viewing',
+          'Exempt',
+          'Full_day',
+          'Part_day',
+          'Scenic_flights'
+        ],
+        range: [
+          '#4C78A8',
+          '#F58518',
+          '#E45756',
+          '#72B7B2',
+          '#54A24B'
         ]
-
+      }
     },
-}
-);
+
+    tooltip: [
+      {
+        field: 'Year',
+        type: 'ordinal',
+        title: 'Financial Year'
+      },
+      {
+        field: 'Activity',
+        type: 'nominal',
+        title: 'Activity'
+      },
+      {
+        field: 'VisitCount',
+        type: 'quantitative',
+        title: 'Number of Visits',
+        format: ','
+      }
+    ]
+  }
+});
 
 
 draw('diver-impact-chart', {
@@ -612,9 +776,14 @@ draw('diver-impact-chart', {
 
   encoding: {
     x: {
-      field: 'activity',
-      type: 'nominal',
-      title: 'Activity'
+        field: 'activity',
+        type: 'nominal',
+        title: 'Activity',
+        axis: {
+            labelAngle: 0,
+            labelFontSize: 12,
+            labelLimit: 180
+        }
     },
 
     xOffset: {
@@ -648,161 +817,391 @@ draw('diver-impact-chart', {
 });
 
 
-draw('diver-impact-map', {
-  title: 'Reef Contact Rates Across International Dive Sites',
+draw('industry-support-chart', {
+  width: 650,
+  height: { step: 30 },
 
-  width: 750,
-  height: 420,
-
-  projection: {
-    type: 'equalEarth'
+  title: {
+    text: 'Industries Supported by Tourism',
+    subtitle: 'Tropical North Queensland · 2024–25',
   },
 
-    params: [
-    {
-        name: 'metricFilter',
-        value: 'contactRate',
-        bind: {
-        input: 'select',
-        options: ['contactRate', 'damageRate'],
-        labels: ['Reef contact rate', 'Reef damage rate'],
-        name: 'Show: '
-        }
-    }
-    ],
-
-  layer: [
-    // World map background
-    {
-      data: {
-        url: 'https://cdn.jsdelivr.net/npm/vega-datasets@2/data/world-110m.json',
-        format: {
-          type: 'topojson',
-          feature: 'countries'
-        }
-      },
-
-      mark: {
-        type: 'geoshape',
-        fill: '#e8eef0',
-        stroke: '#ffffff',
-        strokeWidth: 0.5
-      }
-    },
-
-    // Dive-site points
-    {
   data: {
-    url: 'data/DiverReef_map_sites.csv',
-    format: {
-      type: 'csv'
-    }
+    url: 'data/TNQ_tourism_industry_GVA_2024_25.csv'
   },
+
+  params: [
+    {
+      name: 'selectedMetric',
+      value: 'economic',
+      bind: {
+        input: 'select',
+        options: ['economic', 'jobs'],
+        labels: ['Economic Contribution', 'Jobs Supported'],
+        name: 'Explore by: '
+      }
+    }
+  ],
 
   transform: [
     {
-      calculate: 'toNumber(datum.latitude)',
-      as: 'lat'
-    },
-    {
-      calculate: 'toNumber(datum.longitude)',
-      as: 'lon'
-    },
-    {
-      calculate: 'toNumber(datum.avg_contacts_per_10min)',
-      as: 'contactRate'
-    },
-    {
-      calculate: 'toNumber(datum.avg_damage_per_10min)',
-      as: 'damageRate'
+      lookup: 'Industry',
+      from: {
+        data: {
+          url: 'data/TNQ_tourism_industry_jobs_2024_25.csv'
+        },
+        key: 'Industry',
+        fields: ['Total_filled_jobs']
+      }
     },
     {
       calculate:
-        "metricFilter === 'contactRate' " +
-        "? datum.contactRate : datum.damageRate",
-      as: 'selectedRate'
+        "selectedMetric === 'economic' ? toNumber(datum.Direct_tourism_GVA_AUD_million) : toNumber(datum.Total_filled_jobs)",
+      as: 'Value'
     },
     {
-      calculate: 'toNumber(datum.observations)',
-      as: 'sampleSize'
-    },
-    {
-      filter:
-        'isValid(datum.lat) && ' +
-        'isValid(datum.lon) && ' +
-        'isValid(datum.contactRate) && ' +
-        'isFinite(datum.contactRate) && ' +
-        'datum.contactRate >= 0'
+      filter: 'isValid(datum.Value)'
     }
   ],
 
   mark: {
-    type: 'circle',
-    color: '#0077b6',
-    opacity: 0.65,
-    stroke: '#ffffff',
-    strokeWidth: 1
+    type: 'bar',
+    cornerRadiusEnd: 4
   },
 
   encoding: {
-    longitude: {
-      field: 'lon',
-      type: 'quantitative'
-    },
-
-    latitude: {
-      field: 'lat',
-      type: 'quantitative'
-    },
-
-        size: {
-        field: 'selectedRate',
-        type: 'quantitative',
-        title: 'Interactions per 10 min',
-        scale: {
-            type: 'linear',
-            domainMin: 0,
-            range: [30, 1800]
-        }
-    },
-
-      legend: {
-        orient: 'right',
-        titleLimit: 180,
-        symbolFillColor: '#0077b6',
-        symbolFillOpacity: 0.65
+    y: {
+      field: 'Industry',
+      type: 'nominal',
+      sort: '-x',
+      title: null,
+      axis: {
+        labelLimit: 270
       }
+    },
+
+    x: {
+      field: 'Value',
+      type: 'quantitative',
+      title: null
+    },
+
+    color: {
+      condition: {
+        test: "selectedMetric === 'economic'",
+        value: '#168AAD'
+      },
+      value: '#A78BFA'
     },
 
     tooltip: [
-      { field: 'country', title: 'Country' },
-      { field: 'site', title: 'Dive site' },
-      { field: 'activity', title: 'Activity' },
       {
-        field: 'contactRate',
-        type: 'quantitative',
-        title: 'Contacts per 10 min',
-        format: '.2f'
+        field: 'Industry',
+        type: 'nominal',
+        title: 'Industry'
       },
       {
-        field: 'damageRate',
+        field: 'Value',
         type: 'quantitative',
-        title: 'Damage per 10 min',
-        format: '.2f'
-      },
-      {
-        field: 'sampleSize',
-        type: 'quantitative',
-        title: 'Observations',
-        format: ',.0f'
+        title: 'Selected Value',
+        format: ',.1f'
       }
     ]
   }
-    
-  ]
 });
 
+draw('diver-damage-chart', {
 
-draw('zone-explorer-map', {
-    
-})
+  width: 700,
+  height: { step: 45 },
+
+  title: {
+    text: 'Diver Behaviour and Coral Reef Impacts',
+    subtitle: 'Study of recreational divers in Indonesia and the Philippines (2026)',
+  },
+
+  data: {
+    url: 'data/diver_coral_damage_2026_study_summary.csv'
+  },
+
+  params: [
+  {
+    name: 'selectedCategory',
+    value: 'Diver Behaviour',
+    bind: {
+      input: 'select',
+      options: [
+        'Diver Behaviour',
+        'Wildlife Sightings'
+      ],
+      labels: [
+        'Diver Behaviour',
+        'Impact of Wildlife Sightings'
+      ],
+      name: 'Explore: '
+    }
+  }
+],
+
+transform: [
+  {
+    calculate: 'toNumber(datum.Value)',
+    as: 'Amount'
+  },
+  {
+    calculate: `
+      indexof([
+        'Damaging contacts unintentional or unnoticed',
+        'Divers rating themselves above average'
+      ], datum.Metric) >= 0
+      ? 'Diver Behaviour'
+      : 'Wildlife Sightings'
+    `,
+    as: 'Category'
+  },
+  {
+    filter: `
+      indexof([
+        'Damaging contacts unintentional or unnoticed',
+        'Divers rating themselves above average',
+        'Increase in intentional contacts with wildlife sightings',
+        'Increase in unintentional contacts with wildlife sightings',
+        'Increase in damaging contacts with wildlife sightings'
+      ], datum.Metric) >= 0
+    `
+  },
+  {
+    filter: 'datum.Category === selectedCategory'
+  }
+],
+
+  mark: {
+    type: 'bar',
+    cornerRadiusEnd: 4
+  },
+
+encoding: {
+  y: {
+    field: 'Metric',
+    type: 'nominal',
+    sort: null,
+    title: null,
+    axis: {
+      labelLimit: 350,
+      labelFontSize: 12
+    }
+  },
+
+x: {
+  field: 'Amount',
+  type: 'quantitative',
+  title: 'Percentage (%)',
+  scale: {
+    zero: true
+  }
+},
+
+color: {
+  condition: {
+    test: "selectedCategory === 'Diver Behaviour'",
+    value: '#E76F51'
+  },
+  value: '#168AAD'
+},
+
+  tooltip: [
+    {
+      field: 'Metric',
+      type: 'nominal',
+      title: 'Finding'
+    },
+    {
+      field: 'Amount',
+      type: 'quantitative',
+      title: 'Percentage (%)',
+      format: '.1f'
+    },
+    {
+      field: 'Context',
+      type: 'nominal',
+      title: 'Explanation'
+    }
+  ]
+},
+
+    tooltip: [
+      {
+        field: 'Metric',
+        type: 'nominal',
+        title: 'Finding'
+      },
+      {
+        field: 'DisplayValue',
+        type: 'nominal',
+        title: 'Value'
+      },
+      {
+        field: 'Context',
+        type: 'nominal',
+        title: 'Explanation'
+      }
+    ]
+  }
+
+);
+
+draw('vessel-groundings-chart', {
+  width: 850,
+  height: 350,
+
+  title: {
+    text: 'Vessel Groundings in the Great Barrier Reef',
+    subtitle: 'Reported incidents by vessel type, 2019–2023',
+  },
+
+  data: {
+    url: 'data/GBR_vessel_groundings_2019_2023_digitzed.csv'
+  },
+
+  mark: {
+    type: 'bar',
+    tooltip: true
+  },
+
+  encoding: {
+    x: {
+        field: 'Financial_Year',
+        type: 'ordinal',
+        title: 'Financial Year',
+        axis: {
+            labelAngle: 0,
+            labelFontSize: 12,
+            labelLimit: 180
+    }
+    },
+
+    y: {
+      field: 'Groundings',
+      type: 'quantitative',
+      title: 'Number of Groundings'
+    },
+
+    color: {
+      field: 'Vessel_Type',
+      type: 'nominal',
+      title: 'Vessel Type'
+    },
+
+    xOffset: {
+      field: 'Vessel_Type'
+    },
+
+    tooltip: [
+      { field: 'Financial_Year', title: 'Financial Year' },
+      { field: 'Vessel_Type', title: 'Vessel Type' },
+      { field: 'Groundings', type: 'quantitative', title: 'Groundings' }
+    ]
+  }
+});
+
+draw('coral-cover-chart', {
+  width: 900,
+  height: 230,
+
+  title: {
+    text: 'How Has Coral Cover Changed?',
+    subtitle: 'Average hard coral cover across GBR regions, 2025–2026',
+  },
+
+  data: {
+    url: 'data/GBR_coral_cover_2025_2026.csv'
+  },
+
+  transform: [
+    {
+      calculate: 'toNumber(datum.Hard_Coral_Cover_Percent)',
+      as: 'Cover'
+    },
+    {
+      calculate: 'toString(datum.Year)',
+      as: 'YearLabel'
+    }
+  ],
+
+  encoding: {
+    y: {
+      field: 'Region',
+      type: 'nominal',
+      sort: ['Northern', 'Central', 'Southern'],
+      title: null,
+      axis: {
+        labelFontSize: 13,
+        labelPadding: 12
+      }
+    },
+
+    x: {
+      field: 'Cover',
+      type: 'quantitative',
+      title: 'Average Hard Coral Cover (%)',
+      scale: {
+        domain: [20, 40]
+      },
+      axis: {
+        grid: true,
+        tickCount: 5
+      }
+    }
+  },
+
+  layer: [
+    {
+      mark: {
+        type: 'line',
+        stroke: '#AAB7B8',
+        strokeWidth: 4
+      },
+      encoding: {
+        detail: {
+          field: 'Region'
+        },
+        order: {
+          field: 'Year',
+          type: 'ordinal'
+        }
+      }
+    },
+
+    {
+      mark: {
+        type: 'point',
+        filled: true,
+        size: 220,
+        stroke: 'white',
+        strokeWidth: 2
+      },
+
+      encoding: {
+        color: {
+          field: 'YearLabel',
+          type: 'nominal',
+          title: 'Year',
+          scale: {
+            domain: ['2025', '2026'],
+            range: ['#168AAD', '#E76F51']
+          }
+        },
+
+        tooltip: [
+          { field: 'Region' },
+          { field: 'YearLabel', title: 'Year' },
+          {
+            field: 'Cover',
+            title: 'Coral Cover (%)',
+            format: '.1f'
+          }
+        ]
+      }
+    }
+  ]
+});

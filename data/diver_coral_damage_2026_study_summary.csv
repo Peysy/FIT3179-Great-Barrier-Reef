@@ -1,0 +1,14 @@
+Metric,Value,Unit,Context,Source_DOI
+Divers studied,732,divers,Indonesia and Philippines,10.1111/con4.70055
+Divers with video-assisted observations,411,divers,Subset of study participants,10.1111/con4.70055
+Questionnaire respondents,403,respondents,Subset of study participants,10.1111/con4.70055
+Matched observation and questionnaire participants,82,divers,Subset with both measures,10.1111/con4.70055
+Average reef contact rate,0.26,contacts per diver per minute,Mean observed rate,10.1111/con4.70055
+Standard error of reef contact rate,0.02,contacts per diver per minute,Standard error,10.1111/con4.70055
+Damaging contacts unintentional or unnoticed,81.9,percent,Share of damaging contacts,10.1111/con4.70055
+Divers rating themselves above average,75,percent,Approximate share,10.1111/con4.70055
+Underestimation of reef contacts,4.92,fold,Observed versus self-reported contacts,10.1111/con4.70055
+Standard error of underestimation,0.93,fold,Bootstrapped standard error,10.1111/con4.70055
+Increase in intentional contacts with wildlife sightings,220,percent,Association reported in fixed-effects models,10.1111/con4.70055
+Increase in unintentional contacts with wildlife sightings,85,percent,Association reported in fixed-effects models,10.1111/con4.70055
+Increase in damaging contacts with wildlife sightings,106,percent,Association reported in fixed-effects models,10.1111/con4.70055
