@@ -1,0 +1,21 @@
+﻿Record_Type,Period,Start_Date,End_Date,Duration_Months,Tourism_Weekly_Surveys,Reef_Health_Impact_Surveys,Reef_Health_Surveys_Combined,Coral_Predator_Surveys,Photo_Point_Surveys_or_Transects,COTS_Culled,Drupella_Removed,Coral_Fragments_Planted,Stewardship_Actions,Service_Delivery_Days,Site_Visits_Total,Primary_Site_Visits,Secondary_Site_Visits,Coral_Predator_Control_Days,On_Country_Visits,Traditional_Owner_Visitors,Traditional_Owner_Visit_Days,School_Education_Excursions,Students,Marine_Biologist_Days,Marine_Biologist_Participants,Operators,Stewardship_Sites,Unique_Tourism_Sites,Unique_Reefs,ReefCloud_Images,Species_Recorded,Funding_AUD,Notes
+period,Nov 2022-Feb 2023,2022-11-01,2023-02-28,4,491,1309,,,64,175,19736,,,404,,327,300,276,33,77,,,,14,,,,,,,,,Capacity-building phase; period label as published
+period,Mar-May 2023,2023-03-01,2023-05-31,3,699,2406,,,79,332,52053,,,538,,434,459,452,29,54,,,,13,,,,,,,,,
+period,Jun-Aug 2023,2023-06-01,2023-08-31,3,458,2656,,,59,604,42587,,,576,,152,454,517,16,27,,,,19,,,,,,,,,
+period,Sep-Nov 2023,2023-09-01,2023-11-30,3,,,3730,,90,358,50767,,,547,606,,,520,24,27,,,,18,365,,,,,,,,Source calls 606 protection services conducted at reef sites; recorded under Site_Visits_Total with caveat. Reef health surveys not broken down by type.
+period,Dec 2023-Feb 2024,2023-12-01,2024-02-29,3,,,3490,,254,232,49778,,,614,920,,,493,26,240,55,75,1025,11,,,,,,,,,
+period,Sep-Nov 2024,2024-09-01,2024-11-30,3,383,701,,505,85,584,20223,5355,164,,,,,,,,,,,,,,,,,,,,
+period,Dec 2024-Feb 2025,2024-12-01,2025-02-28,3,437,745,,487,99,705,35121,1497,184,,,,,,,,,,,,,,,,,,,,
+period,Mar-May 2025,2025-03-01,2025-05-31,3,472,944,,504,100,714,20253,2819,168,,,,,,,,,,,,,,,,,,,,
+period,Jul-Aug 2025,2025-07-01,2025-08-31,2,445,540,,503,77,991,13400,4798,173,,,,,,,,,,,,,,,,,,,,
+period,Sep-Nov 2025,2025-09-01,2025-11-30,3,608,699,,804,108,1176,21379,4261,219,,,,,,,,,,,,,,,,,,,,
+period,Dec 2025-Feb 2026,2025-12-01,2026-02-28,3,546,723,,658,116,1347,18759,3264,176,,,,,,,,,,,,,,,,,,,,
+period,Mar-May 2026,2026-03-01,2026-05-31,3,512,778,,531,133,1031,14076,2401,200,,,,,,,,,,,,,,,,,,,,
+period,Jul-Aug 2026,2026-07-01,2026-08-31,2,523,582,,536,91,1046,13967,3320,200,,,,,,,,,,,,,23,25,,,,1921,,"Species recorded is an accumulated biodiversity index snapshot, not newly recorded during this period."
+collective_summary,Nov 2022-Jun 2024 overall,2022-11-01,2024-06-30,,,,19557,,926,2046,278560,,,3240,5353,,,2808,,295,152,115,1592,115,,,,272,109,,,,OVERLAPS period rows; do not sum with them. School excursions and Marine Biologist days are distinct reported categories.
+collective_summary,Sep 2024-Jun 2025 TRPIv3,2024-09-01,2025-06-30,,,,,,,,,,,,,,,,,,,,,,,25,25,,,,,,"Narrative collective outcomes provide operator and site counts, not a full set of numeric activity totals."
+collective_summary,Jun 2025-Jun 2026 TRPIv4,2025-06-01,2026-06-30,,2100,2800,,,,5000,67000,,,,,,,,,,,,,,,23,26,,,37000,,,"Approximate LOWER BOUNDS: source states MORE THAN 2100 weekly surveys, MORE THAN 2800 health surveys, MORE THAN 37000 images; says 67000 Drupella and 5000 COTS (rounded). OVERLAPS period rows; do not sum."
+program_funding,Initial TRPI funding,2022-01-01,2024-06-30,,,,,,,,,,,,,,,,,,,,,,,26,,,,,,15100000,"Allocation announced in 2022; start date is year placeholder, not an exact allocation date."
+program_funding,TRPIv3 extension,2024-07-01,2025-06-30,,,,,,,,,,,,,,,,,,,,,,,,,,,,,5000000,"Further funding; start date inferred from fiscal period, not an exact announcement date."
+program_funding,TRPIv4 commitment,2025-04-01,2026-06-30,,,,,,,,,,,,,,,,,,,,,,,23,26,,,,,5000000,Committed April 2025; start date represents month only.
+program_funding,2026-27 extension,2026-05-01,2027-06-30,,,,,,,,,,,,,,,,,,,,,,,23,25,,,,,5000000,Committed May 2026; start date represents month only.

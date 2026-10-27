@@ -54,7 +54,7 @@ const valueTip = (field, title, fmt = ',.0f') => ({
 });
 
 
-draw('marine-zoning-map-colour', {
+draw('marine-zoning-map', {
 
             "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
 
@@ -182,96 +182,6 @@ draw('marine-zoning-map-colour', {
         }
     );
 
-draw('marine-zoning-map', {
-
-            "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
-
-            "width": 1050,
-            "height": 550,
-
-            "title": {
-                "text": "Great Barrier Reef Marine Park Zoning",
-                "fontSize": 18
-            },
-
-            "projection": {
-                "type": "mercator",
-                "center": [148, -18],
-                "scale": 2000,
-                "translate": [430, 325]
-            },
-
-            "layer": [
-
-                // LAYER 1: Australian coastline
-                {
-                    "data": {
-                        "url": "https://vega.github.io/vega-datasets/data/world-110m.json",
-                        "format": {
-                            "type": "topojson",
-                            "feature": "countries"
-                        }
-                    },
-
-                    "transform": [
-                        {
-                            "filter": "datum.id == 36"
-                        }
-                    ],
-
-                    "mark": {
-                        "type": "geoshape",
-                        "fill": "#E5E7EB",
-                        "stroke": "#64748B",
-                        "strokeWidth": 0.7
-                    }
-                },
-
-                // LAYER 2: Great Barrier Reef zoning
-                {
-                    "data": {
-                        "url": "data/Great_Barrier_Reef_Marine_Park_Zoning_vega.geojson",
-                        "format": {
-                            "type": "json",
-                            "property": "features"
-                        }
-                    },
-
-                    "mark": {
-                        "type": "geoshape",
-                        "fill": "#1ac9e8",
-                        "stroke": "#e6edf8",
-                        "strokeWidth": 0.7
-                    },
-
-                    "encoding": {
-
-
-                        "tooltip": [
-                            {
-                                "field": "properties.PART_DESC",
-                                "title": "Zone"
-                            },
-                            {
-                                "field": "properties.NAME",
-                                "title": "Zone Name"
-                            },
-                            {
-                                "field": "properties.IUCN",
-                                "title": "IUCN Category"
-                            }
-                        ]
-                    }
-                }
-            ],
-
-            "config": {
-                "view": {
-                    "stroke": null
-                }
-            }
-        }
-    );
 
 draw('visitor-chart', {
 
@@ -1114,32 +1024,12 @@ draw('coral-cover-chart', {
   },
 
   data: {
-    url: 'data/GBR_coral_cover_2025_2026.csv'
+    values: [
+      { Region: 'Northern', Cover2024: 39.8, Cover2025: 30.0 },
+      { Region: 'Central', Cover2024: 33.2, Cover2025: 28.6 },
+      { Region: 'Southern', Cover2024: 38.9, Cover2025: 26.9 }
+    ]
   },
-
-  transform: [
-    {
-      calculate: "toString(datum.Year)",
-      as: "YearString"
-    },
-    {
-      pivot: 'YearString',
-      value: 'Coral_Cover',
-      groupby: ['Region']
-    },
-    {
-      calculate: "toNumber(datum['2024'])",
-      as: 'Cover2024'
-    },
-    {
-      calculate: "toNumber(datum['2025'])",
-      as: 'Cover2025'
-    },
-    {
-      calculate: "datum.Cover2025 - datum.Cover2024",
-      as: 'Change'
-    }
-  ],
 
   encoding: {
     y: {
@@ -1151,49 +1041,33 @@ draw('coral-cover-chart', {
         labelFontSize: 13,
         labelPadding: 12
       }
-    },
-
-    x: {
-      field: 'Cover2025',
-      type: 'quantitative',
-      title: 'Average Hard Coral Cover (%)',
-      scale: { domain: [0, 50] }
     }
   },
 
   layer: [
-    // 2025 coral cover bars
     {
       mark: {
         type: 'bar',
         color: '#0072B2',
-        size: 28,
-        cornerRadiusEnd: 4
+        size: 28
       },
 
       encoding: {
+        x: {
+          field: 'Cover2025',
+          type: 'quantitative',
+          title: 'Average Hard Coral Cover (%)',
+          scale: { domain: [0, 50] }
+        },
+
         tooltip: [
           { field: 'Region', title: 'Region' },
-          {
-            field: 'Cover2024',
-            title: '2024 Coral Cover (%)',
-            format: '.1f'
-          },
-          {
-            field: 'Cover2025',
-            title: '2025 Coral Cover (%)',
-            format: '.1f'
-          },
-          {
-            field: 'Change',
-            title: 'Change (percentage points)',
-            format: '+.1f'
-          }
+          { field: 'Cover2024', title: '2024 (%)' },
+          { field: 'Cover2025', title: '2025 (%)' }
         ]
       }
     },
 
-    // 2024 reference markers
     {
       mark: {
         type: 'tick',
@@ -1210,18 +1084,22 @@ draw('coral-cover-chart', {
       }
     },
 
-    // 2025 value labels
     {
       mark: {
         type: 'text',
         align: 'left',
         dx: 7,
         fontSize: 12,
-        color: '#0072B2',
-        fontWeight: 'bold'
+        fontWeight: 'bold',
+        color: '#0072B2'
       },
 
       encoding: {
+        x: {
+          field: 'Cover2025',
+          type: 'quantitative'
+        },
+
         text: {
           field: 'Cover2025',
           type: 'quantitative',
@@ -1636,3 +1514,478 @@ draw('cyclone-map', {
 
   ]
 });
+
+// ==========================================
+// GREAT BARRIER REEF CONSERVATION CHARTS
+// ==========================================
+
+const conservationData =
+  'data/tourism_reef_protection_all_data.csv';
+
+// ------------------------------------------
+// COMMON DATA CLEANING
+// ------------------------------------------
+
+const conservationTransform = [
+  {
+    filter:
+      "datum.Record_Type === 'period' && datum.Start_Date >= '2024-09-01'"
+  },
+  {
+    calculate: "toNumber(datum.Duration_Months)",
+    as: "Months"
+  },
+  {
+    filter: "isValid(datum.Months) && datum.Months > 0"
+  },
+  {
+    calculate: "timeParse(datum.Start_Date, '%Y-%m-%d')",
+    as: "Start"
+  }
+];
+
+const conservationXAxis = {
+  field: "Start",
+  type: "temporal",
+  title: "Reporting Period",
+  axis: {
+    format: "%b %Y",
+    labelAngle: -35,
+    grid: false
+  }
+};
+
+const conservationTooltip = [
+  {
+    field: "Period",
+    type: "nominal",
+    title: "Reporting Period"
+  },
+  {
+    field: "Months",
+    type: "quantitative",
+    title: "Duration (Months)",
+    format: ".0f"
+  }
+];
+
+
+// ==========================================
+// GRAPH 1: REEF MONITORING
+// ==========================================
+
+draw("monitoring-chart", {
+
+  width: 690,
+  height: 320,
+
+  title: {
+    text: "Reef Monitoring Activities",
+    subtitle: "Average surveys per month by participating tourism operators"
+  },
+
+  data: {
+    url: conservationData
+  },
+
+  transform: [
+    ...conservationTransform,
+
+    {
+      fold: [
+        "Tourism_Weekly_Surveys",
+        "Reef_Health_Impact_Surveys",
+        "Coral_Predator_Surveys"
+      ],
+      as: ["Survey", "Count"]
+    },
+
+    {
+      filter:
+        "datum.Count !== null && datum.Count !== ''"
+    },
+
+    {
+      calculate:
+        "toNumber(datum.Count) / datum.Months",
+      as: "MonthlyRate"
+    },
+
+    {
+      calculate:
+        "datum.Survey === 'Tourism_Weekly_Surveys' ? 'Tourism Weekly Surveys' : datum.Survey === 'Reef_Health_Impact_Surveys' ? 'Reef Health Surveys' : 'Coral Predator Surveys'",
+      as: "SurveyType"
+    }
+  ],
+
+  params: [
+    {
+      name: "surveySelect",
+
+      select: {
+        type: "point",
+        fields: ["SurveyType"]
+      },
+
+      bind: "legend"
+    }
+  ],
+
+  mark: {
+    type: "line",
+    point: {
+      filled: true,
+      size: 80
+    },
+    strokeWidth: 3
+  },
+
+  encoding: {
+
+    x: conservationXAxis,
+
+    y: {
+      field: "MonthlyRate",
+      type: "quantitative",
+      title: "Surveys per Month",
+      scale: {
+        zero: true
+      }
+    },
+
+    color: {
+      field: "SurveyType",
+      type: "nominal",
+      title: "Survey Type",
+
+      scale: {
+        domain: [
+          "Tourism Weekly Surveys",
+          "Reef Health Surveys",
+          "Coral Predator Surveys"
+        ],
+        range: [
+          "#0072B2",
+          "#E69F00",
+          "#009E73"
+        ]
+      }
+    },
+
+    opacity: {
+      condition: {
+        param: "surveySelect",
+        value: 1
+      },
+      value: 0.15
+    },
+
+    tooltip: [
+      ...conservationTooltip,
+
+      {
+        field: "SurveyType",
+        title: "Survey Type"
+      },
+
+      {
+        field: "Count",
+        type: "quantitative",
+        title: "Total Surveys",
+        format: ",.0f"
+      },
+
+      {
+        field: "MonthlyRate",
+        type: "quantitative",
+        title: "Surveys per Month",
+        format: ".1f"
+      }
+    ]
+  }
+});
+
+
+// ==========================================
+// GRAPH 2: CORAL PREDATOR CONTROL
+// ==========================================
+
+draw("predator-chart", {
+
+  width: 690,
+  height: 300,
+
+  title: {
+    text: "Protecting Coral from Predators",
+    subtitle: "Average predator removals per month"
+  },
+
+  data: {
+    url: conservationData
+  },
+
+  transform: [
+    ...conservationTransform,
+
+    {
+      fold: [
+        "COTS_Culled",
+        "Drupella_Removed"
+      ],
+      as: ["Activity", "Count"]
+    },
+
+    {
+      filter:
+        "datum.Count !== null && datum.Count !== ''"
+    },
+
+    {
+      calculate:
+        "toNumber(datum.Count) / datum.Months",
+      as: "MonthlyRate"
+    },
+
+    {
+      calculate:
+        "datum.Activity === 'COTS_Culled' ? 'Crown-of-thorns Starfish' : 'Drupella Snails'",
+      as: "Species"
+    },
+
+    {
+      filter:
+        "datum.Species === speciesChoice"
+    }
+  ],
+
+  params: [
+    {
+      name: "speciesChoice",
+
+      value: "Crown-of-thorns Starfish",
+
+      bind: {
+        input: "select",
+
+        options: [
+          "Crown-of-thorns Starfish",
+          "Drupella Snails"
+        ],
+
+        name: "Select Predator: "
+      }
+    }
+  ],
+
+  mark: {
+    type: "bar",
+    color: "#D55E00",
+    cornerRadiusTopLeft: 4,
+    cornerRadiusTopRight: 4
+  },
+
+  encoding: {
+
+    x: conservationXAxis,
+
+    y: {
+      field: "MonthlyRate",
+      type: "quantitative",
+      title: "Predators Removed per Month"
+    },
+
+    tooltip: [
+      ...conservationTooltip,
+
+      {
+        field: "Species",
+        title: "Predator"
+      },
+
+      {
+        field: "Count",
+        type: "quantitative",
+        title: "Total Removed",
+        format: ",.0f"
+      },
+
+      {
+        field: "MonthlyRate",
+        type: "quantitative",
+        title: "Removed per Month",
+        format: ",.1f"
+      }
+    ]
+  }
+});
+
+
+// ==========================================
+// GRAPH 3: CORAL RESTORATION
+// ==========================================
+
+draw("recovery-chart", {
+
+  width: 690,
+  height: 300,
+
+  title: {
+    text: "Coral Restoration Activities",
+    subtitle: "Average coral fragments planted per month"
+  },
+
+  data: {
+    url: conservationData
+  },
+
+  transform: [
+    ...conservationTransform,
+
+    {
+      filter:
+        "datum.Coral_Fragments_Planted !== null && datum.Coral_Fragments_Planted !== ''"
+    },
+
+    {
+      calculate:
+        "toNumber(datum.Coral_Fragments_Planted)",
+      as: "Count"
+    },
+
+    {
+      calculate:
+        "datum.Count / datum.Months",
+      as: "MonthlyRate"
+    }
+  ],
+
+  mark: {
+    type: "bar",
+    color: "#009E73",
+    size: 28,
+    cornerRadiusTopLeft: 4,
+    cornerRadiusTopRight: 4
+  },
+
+  encoding: {
+
+    x: conservationXAxis,
+
+    y: {
+      field: "MonthlyRate",
+      type: "quantitative",
+      title: "Coral Fragments Planted per Month"
+    },
+
+    tooltip: [
+      ...conservationTooltip,
+
+      {
+        field: "Count",
+        type: "quantitative",
+        title: "Total Fragments Planted",
+        format: ",.0f"
+      },
+
+      {
+        field: "MonthlyRate",
+        type: "quantitative",
+        title: "Fragments per Month",
+        format: ",.1f"
+      }
+    ]
+  }
+});
+
+// ==========================================
+// HIGH STANDARD TOURISM OPERATORS
+// ==========================================
+
+draw("high-operator-chart", {
+
+  width: 490,
+  height: 300,
+
+  title: {
+    text: "Growth of High Standard Tourism Operators",
+    subtitle: "Recognised operators in selected years"
+  },
+
+  data: {
+    url: "data/high_standard_operators.csv"
+  },
+
+  mark: {
+    type: "bar",
+    color: "#009E73",
+    size: 55,
+    cornerRadiusTopLeft: 5,
+    cornerRadiusTopRight: 5
+  },
+
+  encoding: {
+
+    x: {
+      field: "Year",
+      type: "ordinal",
+      title: "Year",
+      sort: ["2004", "2017", "2023"],
+      axis: {
+        labelAngle: 0
+      }
+    },
+
+    y: {
+      field: "Operators",
+      type: "quantitative",
+      title: "Number of Operators",
+      scale: {
+        domain: [0, 80]
+      }
+    },
+
+    tooltip: [
+      {
+        field: "Year",
+        type: "ordinal",
+        title: "Year"
+      },
+      {
+        field: "Operators",
+        type: "quantitative",
+        title: "Recognised Operators",
+        format: ",.0f"
+      }
+    ]
+  },
+
+  layer: [
+    {
+      mark: {
+        type: "bar",
+        color: "#009E73",
+        size: 55,
+        cornerRadiusTopLeft: 5,
+        cornerRadiusTopRight: 5
+      }
+    },
+    {
+      mark: {
+        type: "text",
+        dy: -10,
+        fontSize: 14,
+        fontWeight: "bold",
+        color: "#073B4C"
+      },
+
+      encoding: {
+        text: {
+          field: "Operators",
+          type: "quantitative",
+          format: ".0f"
+        }
+      }
+    }
+  ]
+});
+
