@@ -1105,12 +1105,12 @@ draw('vessel-groundings-chart', {
 });
 
 draw('coral-cover-chart', {
-  width: 900,
-  height: 230,
+  width: 650,
+  height: 250,
 
   title: {
-    text: 'How Has Coral Cover Changed?',
-    subtitle: 'Average hard coral cover across GBR regions, 2025–2026',
+    text: 'Coral Cover Decline Across the Reef',
+    subtitle: '2025 coral cover compared with the 2024 reference'
   },
 
   data: {
@@ -1119,12 +1119,25 @@ draw('coral-cover-chart', {
 
   transform: [
     {
-      calculate: 'toNumber(datum.Hard_Coral_Cover_Percent)',
-      as: 'Cover'
+      calculate: "toString(datum.Year)",
+      as: "YearString"
     },
     {
-      calculate: 'toString(datum.Year)',
-      as: 'YearLabel'
+      pivot: 'YearString',
+      value: 'Coral_Cover',
+      groupby: ['Region']
+    },
+    {
+      calculate: "toNumber(datum['2024'])",
+      as: 'Cover2024'
+    },
+    {
+      calculate: "toNumber(datum['2025'])",
+      as: 'Cover2025'
+    },
+    {
+      calculate: "datum.Cover2025 - datum.Cover2024",
+      as: 'Change'
     }
   ],
 
@@ -1132,8 +1145,8 @@ draw('coral-cover-chart', {
     y: {
       field: 'Region',
       type: 'nominal',
-      sort: ['Northern', 'Central', 'Southern'],
       title: null,
+      sort: ['Northern', 'Central', 'Southern'],
       axis: {
         labelFontSize: 13,
         labelPadding: 12
@@ -1141,67 +1154,485 @@ draw('coral-cover-chart', {
     },
 
     x: {
-      field: 'Cover',
+      field: 'Cover2025',
       type: 'quantitative',
       title: 'Average Hard Coral Cover (%)',
-      scale: {
-        domain: [20, 40]
-      },
-      axis: {
-        grid: true,
-        tickCount: 5
-      }
+      scale: { domain: [0, 50] }
     }
   },
 
   layer: [
+    // 2025 coral cover bars
     {
       mark: {
-        type: 'line',
-        stroke: '#AAB7B8',
-        strokeWidth: 4
+        type: 'bar',
+        color: '#0072B2',
+        size: 28,
+        cornerRadiusEnd: 4
       },
+
       encoding: {
-        detail: {
-          field: 'Region'
-        },
-        order: {
-          field: 'Year',
-          type: 'ordinal'
+        tooltip: [
+          { field: 'Region', title: 'Region' },
+          {
+            field: 'Cover2024',
+            title: '2024 Coral Cover (%)',
+            format: '.1f'
+          },
+          {
+            field: 'Cover2025',
+            title: '2025 Coral Cover (%)',
+            format: '.1f'
+          },
+          {
+            field: 'Change',
+            title: 'Change (percentage points)',
+            format: '+.1f'
+          }
+        ]
+      }
+    },
+
+    // 2024 reference markers
+    {
+      mark: {
+        type: 'tick',
+        color: '#073B4C',
+        thickness: 4,
+        size: 45
+      },
+
+      encoding: {
+        x: {
+          field: 'Cover2024',
+          type: 'quantitative'
         }
       }
     },
 
+    // 2025 value labels
     {
       mark: {
-        type: 'point',
-        filled: true,
-        size: 220,
-        stroke: 'white',
-        strokeWidth: 2
+        type: 'text',
+        align: 'left',
+        dx: 7,
+        fontSize: 12,
+        color: '#0072B2',
+        fontWeight: 'bold'
       },
 
       encoding: {
+        text: {
+          field: 'Cover2025',
+          type: 'quantitative',
+          format: '.1f'
+        }
+      }
+    }
+  ]
+});
+
+draw('heat-stress-map', {
+  width: 750,
+  height: 650,
+
+  title: {
+    text: 'Marine Heat Stress Across the Great Barrier Reef',
+    subtitle: 'Accumulated ocean heat stress (Degree Heating Weeks)',
+    anchor: 'start'
+  },
+
+  data: {
+    url: 'data/GBR_heat_stress_2020_2025_monthly_sampled.csv'
+  },
+
+  params: [
+    {
+      name: 'selectedYear',
+      value: 2024,
+      bind: {
+        input: 'select',
+        options: [2020, 2021, 2022, 2023, 2024, 2025],
+        name: 'Year: '
+      }
+    },
+    {
+      name: 'selectedMonth',
+      value: 3,
+      bind: {
+        input: 'select',
+        options: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+        name: 'Month: '
+      }
+    }
+  ],
+
+  transform: [
+    {
+      calculate: 'toNumber(datum.Year)',
+      as: 'YearNum'
+    },
+    {
+      calculate: 'toNumber(datum.Month)',
+      as: 'MonthNum'
+    },
+    {
+      calculate: 'toNumber(datum.DHW)',
+      as: 'HeatStress'
+    },
+    {
+      filter: 'datum.YearNum === selectedYear && datum.MonthNum === selectedMonth'
+    }
+  ],
+
+  projection: {
+    type: 'mercator',
+    center: [148, -18],
+    scale: 2000,
+    translate: [430, 325]
+  },
+
+  mark: {
+    type: 'square',
+    size: 50,
+    opacity: 0.85
+  },
+
+  encoding: {
+    longitude: {
+      field: 'Longitude',
+      type: 'quantitative'
+    },
+
+    latitude: {
+      field: 'Latitude',
+      type: 'quantitative'
+    },
+
+    color: {
+      field: 'HeatStress',
+      type: 'quantitative',
+      title: 'DHW (°C-weeks)',
+      scale: {
+        domain: [0, 4, 8, 12, 16],
+        range: [
+          '#2166AC',
+          '#FEE08B',
+          '#FDAE61',
+          '#F46D43',
+          '#A50026'
+        ],
+        clamp: true
+      }
+    },
+
+    tooltip: [
+      { field: 'YearNum', title: 'Year' },
+      { field: 'MonthNum', title: 'Month' },
+      {
+        field: 'HeatStress',
+        title: 'Degree Heating Weeks',
+        format: '.1f'
+      }
+    ]
+  }
+});
+
+draw('cyclone-map', {
+  width: 975,
+  height: 650,
+
+  background: '#EAF6FA',
+
+  title: {
+    text: 'Tropical Cyclones Near the Great Barrier Reef',
+    subtitle: 'Cyclone tracks from 2020 to 2025',
+  },
+
+  projection: {
+    type: 'mercator',
+    center: [148, -18],
+    scale: 2000,
+    translate: [475, 325]
+  },
+
+  params: [
+    {
+      name: 'selectedCycloneYear',
+      value: 'All Years',
+      bind: {
+        input: 'select',
+        options: [
+          'All Years',
+          '2020',
+          '2021',
+          '2022',
+          '2023',
+          '2024',
+          '2025'
+        ],
+        name: 'Year: '
+      }
+    }
+  ],
+
+  layer: [
+
+    {
+      data: {
+        url: 'https://vega.github.io/vega-datasets/data/world-110m.json',
+        format: {
+          type: 'topojson',
+          feature: 'countries'
+        }
+      },
+
+      mark: {
+        type: 'geoshape',
+        fill: '#E8E2D5',
+        stroke: '#8A9A9D',
+        strokeWidth: 0.8
+      }
+    },
+    {
+      data: {
+        url: 'data/Great_Barrier_Reef_Marine_Park_Zoning_vega.geojson',
+        format: {
+          type: 'json',
+          property: 'features'
+        }
+      },
+
+      mark: {
+        type: 'geoshape',
+        fill: '#52B6A0',
+        fillOpacity: 0.3,
+        stroke: '#168AAD',
+        strokeWidth: 0.3
+      },
+
+      encoding: {
+        tooltip: [
+          {
+            field: 'properties.PART_DESC',
+            title: 'Marine Park Zone'
+          },
+          {
+            field: 'properties.NAME',
+            title: 'Zone Name'
+          }
+        ]
+      }
+    },
+
+    {
+      data: {
+        url: 'data/GBR_cyclone_tracks_2020_2025.csv'
+      },
+
+      transform: [
+        {
+          calculate: 'toDate(datum.Date)',
+          as: 'CycloneDate'
+        },
+        {
+          calculate: 'year(datum.CycloneDate)',
+          as: 'CycloneYear'
+        },
+        {
+          calculate: 'toNumber(datum.Longitude)',
+          as: 'Lon'
+        },
+        {
+          calculate: 'toNumber(datum.Latitude)',
+          as: 'Lat'
+        },
+        {
+          filter:
+            "selectedCycloneYear === 'All Years' || " +
+            "toString(datum.CycloneYear) === selectedCycloneYear"
+        }
+      ],
+
+      mark: {
+        type: 'line',
+        strokeWidth: 2.5,
+        opacity: 0.85
+      },
+
+      encoding: {
+        longitude: {
+          field: 'Lon',
+          type: 'quantitative'
+        },
+
+        latitude: {
+          field: 'Lat',
+          type: 'quantitative'
+        },
+
+        detail: {
+          field: 'Storm_ID',
+          type: 'nominal'
+        },
+
+        order: {
+          field: 'CycloneDate',
+          type: 'temporal'
+        },
+
         color: {
-          field: 'YearLabel',
+          field: 'Storm_Name',
           type: 'nominal',
-          title: 'Year',
+          title: 'Cyclone Name',
+
           scale: {
-            domain: ['2025', '2026'],
-            range: ['#168AAD', '#E76F51']
+            range: [
+              '#0072B2',
+              '#E69F00',
+              '#CC79A7',
+              '#56B4E9',
+              '#F0E442',
+              '#332288',
+              '#88CCEE',
+              '#AA4499',
+              '#DDCC77',
+              '#6699CC',
+              '#AA88CC',
+              '#DDAA33',
+              '#44AA99',
+              '#999933',
+              '#882255',
+              '#77AADD',
+              '#EE8866',
+              '#BBBBBB',
+              '#99DDFF',
+              '#BB99DD',
+              '#CCBB44',
+              '#4477AA'
+            ]
+          },
+
+          legend: {
+            orient: 'right',
+            title: 'Cyclone Name',
+            labelFontSize: 11,
+            titleFontSize: 13,
+            labelLimit: 180,
+            symbolType: 'stroke',
+            symbolStrokeWidth: 3,
+            symbolSize: 150
           }
         },
 
         tooltip: [
-          { field: 'Region' },
-          { field: 'YearLabel', title: 'Year' },
           {
-            field: 'Cover',
-            title: 'Coral Cover (%)',
-            format: '.1f'
+            field: 'Storm_Name',
+            title: 'Cyclone'
+          },
+          {
+            field: 'CycloneDate',
+            type: 'temporal',
+            title: 'Recorded Date',
+            format: '%d %B %Y, %H:%M'
+          }
+        ]
+      }
+    },
+
+    {
+      data: {
+        url: 'data/GBR_cyclone_tracks_2020_2025.csv'
+      },
+
+      transform: [
+        {
+          calculate: 'toDate(datum.Date)',
+          as: 'CycloneDate'
+        },
+        {
+          calculate: 'year(datum.CycloneDate)',
+          as: 'CycloneYear'
+        },
+        {
+          calculate: 'toNumber(datum.Longitude)',
+          as: 'Lon'
+        },
+        {
+          calculate: 'toNumber(datum.Latitude)',
+          as: 'Lat'
+        },
+        {
+          calculate: 'toNumber(datum.Wind_Speed)',
+          as: 'WindKnots'
+        },
+        {
+          filter:
+            "selectedCycloneYear === 'All Years' || " +
+            "toString(datum.CycloneYear) === selectedCycloneYear"
+        }
+      ],
+
+      mark: {
+        type: 'circle',
+        size: 35,
+        opacity: 0.75
+      },
+
+      encoding: {
+        longitude: {
+          field: 'Lon',
+          type: 'quantitative'
+        },
+
+        latitude: {
+          field: 'Lat',
+          type: 'quantitative'
+        },
+
+        color: {
+          field: 'Storm_Name',
+          type: 'nominal',
+          legend: null
+        },
+
+        tooltip: [
+          {
+            field: 'Storm_Name',
+            type: 'nominal',
+            title: 'Cyclone'
+          },
+
+          {
+            field: 'CycloneDate',
+            type: 'temporal',
+            title: 'Recorded Date',
+            format: '%d %B %Y, %H:%M'
+          },
+
+          {
+            field: 'Wind_Knots',
+            type: 'quantitative',
+            title: 'Wind Speed (knots)',
+            format: '.0f'
+          },
+
+          {
+            field: 'Lat',
+            type: 'quantitative',
+            title: 'Latitude',
+            format: '.2f'
+          },
+
+          {
+            field: 'Lon',
+            type: 'quantitative',
+            title: 'Longitude',
+            format: '.2f'
           }
         ]
       }
     }
+
   ]
 });

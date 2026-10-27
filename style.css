@@ -1,0 +1,49 @@
+/* Environmental Threat Cards */
+
+.threat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+  margin: 30px 0;
+}
+
+.threat-card {
+  background: white;
+  border: 1px solid #d7e9ed;
+  border-radius: 14px;
+  padding: 25px;
+  box-shadow: 0 4px 12px rgba(0, 50, 70, 0.08);
+  transition: transform 0.25s, box-shadow 0.25s;
+}
+
+.threat-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 8px 20px rgba(0, 50, 70, 0.15);
+}
+
+.threat-card h3 {
+  color: #073b4c;
+  font-size: 19px;
+  margin-bottom: 12px;
+}
+
+.threat-card p {
+  color: #47636b;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.threat-icon {
+  font-size: 35px;
+  margin-bottom: 15px;
+}
+
+.threat-tag {
+  display: inline-block;
+  background: #e4f4f8;
+  color: #126782;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  margin-top: 15px;
+}
