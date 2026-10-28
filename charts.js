@@ -183,69 +183,107 @@ draw('marine-zoning-map', {
     );
 
 
-draw('visitor-chart', {
+// ==========================================
+// VISITOR COMPOSITION — WAFFLE CHART
+// ==========================================
 
-    width: 985,
-    height: 155,
+draw("visitor-chart", {
 
-    title: 'Visitors by origin · YE March 2026',
+  width: 600,
+  height: 250,
 
-    data: {
-        url: 'data/visitor_mix_2026.csv'
+  title: {
+    text: "Who Visits the Great Barrier Reef?",
+    subtitle: "Domestic vs International Visitors — YE March 2026"
+  },
+
+  data: {
+    values: [
+      { Origin: "Domestic", Visitors: 1750000 },
+      { Origin: "International", Visitors: 637000 }
+    ]
+  },
+
+  transform: [
+    {
+      calculate: "datum.Visitors / 2387000 * 100",
+      as: "Percentage"
     },
 
-    mark: {
-        type: 'bar',
-        cornerRadiusEnd: 5
+    {
+      calculate: "round(datum.Percentage)",
+      as: "Squares"
     },
 
-    encoding: {
+    {
+      calculate: "sequence(0, 100)",
+      as: "Grid"
+    },
 
-        y: {
-            field: 'Type',
-            type: 'nominal',
-            sort: '-x',
-            title: null
-        },
+    {
+      flatten: ["Grid"]
+    },
 
-        x: {
-            field: 'Visitors',
-            type: 'quantitative',
-            title: 'Visitors',
+    {
+      calculate: "datum.Grid % 10",
+      as: "Column"
+    },
 
-            axis: {
-                format: '~s'
-            }
-        },
+    {
+      calculate: "floor(datum.Grid / 10)",
+      as: "Row"
+    },
 
-        color: {
-            field: 'Type',
-            type: 'nominal',
-
-            scale: {
-                domain: [
-                    'Domestic',
-                    'International'
-                ],
-
-                range: [
-                    '#147d7c',
-                    '#e3a451'
-                ]
-            },
-
-            legend: null
-        },
-
-        tooltip: [
-            {
-                field: 'Type',
-                title: 'Visitor type'
-            },
-
-            valueTip('Visitors', 'Visitors')
-        ]
+    {
+      calculate:
+        "datum.Grid < 73 ? 'Domestic' : 'International'",
+      as: "Category"
     }
+  ],
+
+  mark: {
+    type: "rect",
+    cornerRadius: 2,
+    stroke: "#ffffff",
+    strokeWidth: 2
+  },
+
+  encoding: {
+
+    x: {
+      field: "Column",
+      type: "ordinal",
+      axis: null
+    },
+
+    y: {
+      field: "Row",
+      type: "ordinal",
+      axis: null
+    },
+
+    color: {
+      field: "Category",
+      type: "nominal",
+
+      scale: {
+        domain: ["Domestic", "International"],
+        range: ["#0072B2", "#009E73"]
+      },
+
+      legend: {
+        orient: "bottom",
+        title: null
+      }
+    },
+
+    tooltip: [
+      {
+        field: "Category",
+        title: "Visitor Origin"
+      }
+    ]
+  }
 });
 
 
@@ -651,14 +689,21 @@ draw('reef-tourism-chart', {
 });
 
 
-draw('diver-impact-chart', {
-  title: 'Reef Contact and Damage by Activity',
+// ==========================================
+// DIVER IMPACT — DUMBBELL CHART
+// ==========================================
 
-  width: 650,
-  height: 300,
+draw("diver-impact-chart", {
+  width: 750,
+  height: 280,
+
+  title: {
+    text: "Reef Contact and Damage by Activity",
+    subtitle: "Average recorded interactions per 10 minutes"
+  },
 
   data: {
-    url: 'data/DiverReef_cleaned.csv'
+    url: "data/DiverReef_cleaned.csv"
   },
 
   transform: [
@@ -667,63 +712,115 @@ draw('diver-impact-chart', {
         "isValid(datum.contact_per_10min) && " +
         "isValid(datum.damage_per_10min)"
     },
+
     {
-      fold: [
-        'contact_per_10min',
-        'damage_per_10min'
+      aggregate: [
+        {
+          op: "mean",
+          field: "contact_per_10min",
+          as: "Contact"
+        },
+        {
+          op: "mean",
+          field: "damage_per_10min",
+          as: "Damage"
+        }
       ],
-      as: ['Interaction', 'Rate']
-    },
-    {
-      calculate:
-        "datum.Interaction === 'contact_per_10min' " +
-        "? 'Physical contact' : 'Recorded damage'",
-      as: 'InteractionType'
+      groupby: ["activity"]
     }
   ],
 
-  mark: 'bar',
-
   encoding: {
-    x: {
-        field: 'activity',
-        type: 'nominal',
-        title: 'Activity',
-        axis: {
-            labelAngle: 0,
-            labelFontSize: 12,
-            labelLimit: 180
-        }
-    },
-
-    xOffset: {
-      field: 'InteractionType'
-    },
-
     y: {
-      aggregate: 'mean',
-      field: 'Rate',
-      type: 'quantitative',
-      title: 'Average interactions per 10 minutes'
-    },
-
-    color: {
-      field: 'InteractionType',
-      type: 'nominal',
-      title: 'Interaction'
+      field: "activity",
+      type: "nominal",
+      title: null,
+      sort: {
+        field: "Contact",
+        order: "descending"
+      },
+      axis: {
+        labelLimit: 200
+      }
     },
 
     tooltip: [
-      { field: 'activity', title: 'Activity' },
-      { field: 'InteractionType', title: 'Interaction' },
       {
-        aggregate: 'mean',
-        field: 'Rate',
-        title: 'Average per 10 minutes',
-        format: '.2f'
+        field: "activity",
+        type: "nominal",
+        title: "Activity"
+      },
+      {
+        field: "Contact",
+        type: "quantitative",
+        title: "Physical Contact",
+        format: ".2f"
+      },
+      {
+        field: "Damage",
+        type: "quantitative",
+        title: "Recorded Damage",
+        format: ".2f"
       }
     ]
-  }
+  },
+
+  layer: [
+    {
+      mark: {
+        type: "rule",
+        strokeWidth: 3,
+        color: "#a5bac0"
+      },
+
+      encoding: {
+        x: {
+          field: "Contact",
+          type: "quantitative",
+          title: "Average Interactions per 10 Minutes",
+          scale: {
+            zero: true
+          }
+        },
+
+        x2: {
+          field: "Damage"
+        }
+      }
+    },
+
+    {
+      mark: {
+        type: "point",
+        filled: true,
+        size: 150,
+        color: "#0072B2"
+      },
+
+      encoding: {
+        x: {
+          field: "Contact",
+          type: "quantitative"
+        }
+      }
+    },
+
+    {
+      mark: {
+        type: "point",
+        filled: true,
+        size: 150,
+        color: "#D55E00"
+      },
+
+      encoding: {
+        x: {
+          field: "Damage",
+          type: "quantitative"
+        }
+      }
+    }
+  ]
 });
 
 
@@ -774,10 +871,34 @@ draw('industry-support-chart', {
     }
   ],
 
-  mark: {
-    type: 'bar',
-    cornerRadiusEnd: 4
-  },
+
+    layer: [
+    {
+      mark: {
+        type: "rule",
+        strokeWidth: 3,
+        color: "#b9d9df"
+      },
+
+      encoding: {
+        x: {
+          datum: 0
+        },
+        x2: {
+          field: "Value"
+        }
+      }
+    },
+
+    {
+      mark: {
+        type: "point",
+        filled: true,
+        size: 180,
+        color: "#0072B2"
+      }
+    }
+  ],
 
   encoding: {
     y: {
@@ -1519,65 +1640,15 @@ draw('cyclone-map', {
 // GREAT BARRIER REEF CONSERVATION CHARTS
 // ==========================================
 
-const conservationData =
-  'data/tourism_reef_protection_all_data.csv';
-
-// ------------------------------------------
-// COMMON DATA CLEANING
-// ------------------------------------------
-
-const conservationTransform = [
-  {
-    filter:
-      "datum.Record_Type === 'period' && datum.Start_Date >= '2024-09-01'"
-  },
-  {
-    calculate: "toNumber(datum.Duration_Months)",
-    as: "Months"
-  },
-  {
-    filter: "isValid(datum.Months) && datum.Months > 0"
-  },
-  {
-    calculate: "timeParse(datum.Start_Date, '%Y-%m-%d')",
-    as: "Start"
-  }
-];
-
-const conservationXAxis = {
-  field: "Start",
-  type: "temporal",
-  title: "Reporting Period",
-  axis: {
-    format: "%b %Y",
-    labelAngle: -35,
-    grid: false
-  }
-};
-
-const conservationTooltip = [
-  {
-    field: "Period",
-    type: "nominal",
-    title: "Reporting Period"
-  },
-  {
-    field: "Months",
-    type: "quantitative",
-    title: "Duration (Months)",
-    format: ".0f"
-  }
-];
-
 
 // ==========================================
-// GRAPH 1: REEF MONITORING
+// GRAPH 1: REEF MONITORING — HEATMAP
 // ==========================================
 
 draw("monitoring-chart", {
 
-  width: 690,
-  height: 320,
+  width: 760,
+  height: 200,
 
   title: {
     text: "Reef Monitoring Activities",
@@ -1585,11 +1656,28 @@ draw("monitoring-chart", {
   },
 
   data: {
-    url: conservationData
+    url: "data/tourism_reef_protection_all_data.csv"
   },
 
   transform: [
-    ...conservationTransform,
+    {
+      filter:
+        "datum.Record_Type === 'period' && datum.Start_Date >= '2024-09-01'"
+    },
+
+    {
+      calculate: "toNumber(datum.Duration_Months)",
+      as: "Months"
+    },
+
+    {
+      filter: "isValid(datum.Months) && datum.Months > 0"
+    },
+
+    {
+      calculate: "timeParse(datum.Start_Date, '%Y-%m-%d')",
+      as: "Start"
+    },
 
     {
       fold: [
@@ -1601,105 +1689,119 @@ draw("monitoring-chart", {
     },
 
     {
-      filter:
-        "datum.Count !== null && datum.Count !== ''"
+      filter: "datum.Count !== null && datum.Count !== ''"
     },
 
     {
-      calculate:
-        "toNumber(datum.Count) / datum.Months",
+      calculate: "toNumber(datum.Count)",
+      as: "TotalSurveys"
+    },
+
+    {
+      calculate: "datum.TotalSurveys / datum.Months",
       as: "MonthlyRate"
     },
 
     {
       calculate:
-        "datum.Survey === 'Tourism_Weekly_Surveys' ? 'Tourism Weekly Surveys' : datum.Survey === 'Reef_Health_Impact_Surveys' ? 'Reef Health Surveys' : 'Coral Predator Surveys'",
+        "datum.Survey === 'Tourism_Weekly_Surveys' ? 'Tourism Weekly Surveys' : " +
+        "datum.Survey === 'Reef_Health_Impact_Surveys' ? 'Reef Health Surveys' : " +
+        "'Coral Predator Surveys'",
       as: "SurveyType"
     }
   ],
 
-  params: [
-    {
-      name: "surveySelect",
-
-      select: {
-        type: "point",
-        fields: ["SurveyType"]
-      },
-
-      bind: "legend"
-    }
-  ],
-
   mark: {
-    type: "line",
-    point: {
-      filled: true,
-      size: 80
-    },
-    strokeWidth: 3
+    type: "rect",
+    cornerRadius: 3,
+    stroke: "#ffffff",
+    strokeWidth: 2
   },
 
   encoding: {
 
-    x: conservationXAxis,
+    x: {
+      field: "Period",
+      type: "ordinal",
+      title: "Reporting Period",
+
+      sort: {
+        field: "Start",
+        order: "ascending"
+      },
+
+      axis: {
+        labelAngle: -40,
+        labelFontSize: 11,
+        labelLimit: 130
+      }
+    },
 
     y: {
-      field: "MonthlyRate",
-      type: "quantitative",
-      title: "Surveys per Month",
-      scale: {
-        zero: true
+      field: "SurveyType",
+      type: "nominal",
+      title: null,
+
+      sort: [
+        "Tourism Weekly Surveys",
+        "Reef Health Surveys",
+        "Coral Predator Surveys"
+      ],
+
+      axis: {
+        labelFontSize: 12,
+        labelLimit: 180
       }
     },
 
     color: {
-      field: "SurveyType",
-      type: "nominal",
-      title: "Survey Type",
+      field: "MonthlyRate",
+      type: "quantitative",
+      title: "Surveys / Month",
 
       scale: {
-        domain: [
-          "Tourism Weekly Surveys",
-          "Reef Health Surveys",
-          "Coral Predator Surveys"
-        ],
-        range: [
-          "#0072B2",
-          "#E69F00",
-          "#009E73"
-        ]
+        scheme: "tealblues"
+      },
+
+      legend: {
+        orient: "right",
+        titleFontSize: 12,
+        labelFontSize: 11
       }
     },
 
-    opacity: {
-      condition: {
-        param: "surveySelect",
-        value: 1
-      },
-      value: 0.15
-    },
-
     tooltip: [
-      ...conservationTooltip,
+      {
+        field: "Period",
+        type: "nominal",
+        title: "Reporting Period"
+      },
 
       {
         field: "SurveyType",
+        type: "nominal",
         title: "Survey Type"
       },
 
       {
-        field: "Count",
+        field: "TotalSurveys",
         type: "quantitative",
         title: "Total Surveys",
         format: ",.0f"
       },
 
       {
+        field: "Months",
+        type: "quantitative",
+        title: "Duration (Months)",
+        format: ".0f"
+      },
+
+      {
         field: "MonthlyRate",
         type: "quantitative",
         title: "Surveys per Month",
-        format: ".1f"
+        format: ",.1f"
       }
     ]
   }
@@ -1707,56 +1809,22 @@ draw("monitoring-chart", {
 
 
 // ==========================================
-// GRAPH 2: CORAL PREDATOR CONTROL
+// GRAPH 2: CORAL PREDATOR CONTROL — DOT PLOT
 // ==========================================
 
 draw("predator-chart", {
 
-  width: 690,
+  width: 760,
   height: 300,
 
   title: {
     text: "Protecting Coral from Predators",
-    subtitle: "Average predator removals per month"
+    subtitle: "Average predator removals per month across reporting periods"
   },
 
   data: {
-    url: conservationData
+    url: "data/tourism_reef_protection_all_data.csv"
   },
-
-  transform: [
-    ...conservationTransform,
-
-    {
-      fold: [
-        "COTS_Culled",
-        "Drupella_Removed"
-      ],
-      as: ["Activity", "Count"]
-    },
-
-    {
-      filter:
-        "datum.Count !== null && datum.Count !== ''"
-    },
-
-    {
-      calculate:
-        "toNumber(datum.Count) / datum.Months",
-      as: "MonthlyRate"
-    },
-
-    {
-      calculate:
-        "datum.Activity === 'COTS_Culled' ? 'Crown-of-thorns Starfish' : 'Drupella Snails'",
-      as: "Species"
-    },
-
-    {
-      filter:
-        "datum.Species === speciesChoice"
-    }
-  ],
 
   params: [
     {
@@ -1777,36 +1845,127 @@ draw("predator-chart", {
     }
   ],
 
+  transform: [
+    {
+      filter:
+        "datum.Record_Type === 'period' && datum.Start_Date >= '2024-09-01'"
+    },
+
+    {
+      calculate: "toNumber(datum.Duration_Months)",
+      as: "Months"
+    },
+
+    {
+      filter: "isValid(datum.Months) && datum.Months > 0"
+    },
+
+    {
+      calculate: "timeParse(datum.Start_Date, '%Y-%m-%d')",
+      as: "Start"
+    },
+
+    {
+      fold: [
+        "COTS_Culled",
+        "Drupella_Removed"
+      ],
+      as: ["Activity", "Count"]
+    },
+
+    {
+      filter: "datum.Count !== null && datum.Count !== ''"
+    },
+
+    {
+      calculate: "toNumber(datum.Count)",
+      as: "TotalRemoved"
+    },
+
+    {
+      calculate: "datum.TotalRemoved / datum.Months",
+      as: "MonthlyRate"
+    },
+
+    {
+      calculate:
+        "datum.Activity === 'COTS_Culled' ? 'Crown-of-thorns Starfish' : 'Drupella Snails'",
+      as: "Species"
+    },
+
+    {
+      filter: "datum.Species === speciesChoice"
+    }
+  ],
+
   mark: {
-    type: "bar",
+    type: "point",
+    filled: true,
+    size: 180,
     color: "#D55E00",
-    cornerRadiusTopLeft: 4,
-    cornerRadiusTopRight: 4
+    stroke: "#ffffff",
+    strokeWidth: 1.5
   },
 
   encoding: {
 
-    x: conservationXAxis,
+    x: {
+      field: "Period",
+      type: "ordinal",
+      title: "Reporting Period",
+
+      sort: {
+        field: "Start",
+        order: "ascending"
+      },
+
+      axis: {
+        labelAngle: -35,
+        labelFontSize: 11,
+        labelLimit: 130
+      }
+    },
 
     y: {
       field: "MonthlyRate",
       type: "quantitative",
-      title: "Predators Removed per Month"
+      title: "Predators Removed per Month",
+
+      scale: {
+        zero: true
+      },
+
+      axis: {
+        grid: true,
+        gridColor: "#e5eff1"
+      }
     },
 
     tooltip: [
-      ...conservationTooltip,
+      {
+        field: "Period",
+        type: "nominal",
+        title: "Reporting Period"
+      },
 
       {
         field: "Species",
+        type: "nominal",
         title: "Predator"
       },
 
       {
-        field: "Count",
+        field: "TotalRemoved",
         type: "quantitative",
         title: "Total Removed",
         format: ",.0f"
+      },
+
+      {
+        field: "Months",
+        type: "quantitative",
+        title: "Duration (Months)",
+        format: ".0f"
       },
 
       {
@@ -1821,13 +1980,13 @@ draw("predator-chart", {
 
 
 // ==========================================
-// GRAPH 3: CORAL RESTORATION
+// GRAPH 3: CORAL RESTORATION — BAR CHART
 // ==========================================
 
 draw("recovery-chart", {
 
-  width: 690,
-  height: 300,
+  width: 760,
+  height: 320,
 
   title: {
     text: "Coral Restoration Activities",
@@ -1835,11 +1994,28 @@ draw("recovery-chart", {
   },
 
   data: {
-    url: conservationData
+    url: "data/tourism_reef_protection_all_data.csv"
   },
 
   transform: [
-    ...conservationTransform,
+    {
+      filter:
+        "datum.Record_Type === 'period' && datum.Start_Date >= '2024-09-01'"
+    },
+
+    {
+      calculate: "toNumber(datum.Duration_Months)",
+      as: "Months"
+    },
+
+    {
+      filter: "isValid(datum.Months) && datum.Months > 0"
+    },
+
+    {
+      calculate: "timeParse(datum.Start_Date, '%Y-%m-%d')",
+      as: "Start"
+    },
 
     {
       filter:
@@ -1847,14 +2023,12 @@ draw("recovery-chart", {
     },
 
     {
-      calculate:
-        "toNumber(datum.Coral_Fragments_Planted)",
-      as: "Count"
+      calculate: "toNumber(datum.Coral_Fragments_Planted)",
+      as: "TotalFragments"
     },
 
     {
-      calculate:
-        "datum.Count / datum.Months",
+      calculate: "datum.TotalFragments / datum.Months",
       as: "MonthlyRate"
     }
   ],
@@ -1862,29 +2036,63 @@ draw("recovery-chart", {
   mark: {
     type: "bar",
     color: "#009E73",
-    size: 28,
     cornerRadiusTopLeft: 4,
     cornerRadiusTopRight: 4
   },
 
   encoding: {
 
-    x: conservationXAxis,
+    x: {
+      field: "Period",
+      type: "ordinal",
+      title: "Reporting Period",
+
+      sort: {
+        field: "Start",
+        order: "ascending"
+      },
+
+      axis: {
+        labelAngle: -35,
+        labelFontSize: 11,
+        labelLimit: 130
+      }
+    },
 
     y: {
       field: "MonthlyRate",
       type: "quantitative",
-      title: "Coral Fragments Planted per Month"
+      title: "Coral Fragments Planted per Month",
+
+      scale: {
+        zero: true
+      },
+
+      axis: {
+        grid: true,
+        gridColor: "#e5eff1"
+      }
     },
 
     tooltip: [
-      ...conservationTooltip,
+      {
+        field: "Period",
+        type: "nominal",
+        title: "Reporting Period"
+      },
 
       {
-        field: "Count",
+        field: "TotalFragments",
         type: "quantitative",
         title: "Total Fragments Planted",
         format: ",.0f"
+      },
+
+      {
+        field: "Months",
+        type: "quantitative",
+        title: "Duration (Months)",
+        format: ".0f"
       },
 
       {
@@ -1901,10 +2109,20 @@ draw("recovery-chart", {
 // HIGH STANDARD TOURISM OPERATORS
 // ==========================================
 
+// ==========================================
+// HIGH STANDARD TOURISM OPERATORS
+// PROPORTIONAL SYMBOL TIMELINE
+// ==========================================
+
+// ==========================================
+// HIGH STANDARD TOURISM OPERATORS
+// PROPORTIONAL SYMBOL TIMELINE
+// ==========================================
+
 draw("high-operator-chart", {
 
-  width: 490,
-  height: 300,
+  width: 650,
+  height: 200,
 
   title: {
     text: "Growth of High Standard Tourism Operators",
@@ -1912,70 +2130,94 @@ draw("high-operator-chart", {
   },
 
   data: {
-    url: "data/high_standard_operators.csv"
-  },
-
-  mark: {
-    type: "bar",
-    color: "#009E73",
-    size: 55,
-    cornerRadiusTopLeft: 5,
-    cornerRadiusTopRight: 5
+    values: [
+      { Year: 2004, Operators: 19 },
+      { Year: 2017, Operators: 69 },
+      { Year: 2023, Operators: 72 }
+    ]
   },
 
   encoding: {
-
     x: {
       field: "Year",
-      type: "ordinal",
-      title: "Year",
-      sort: ["2004", "2017", "2023"],
+      type: "quantitative",
+      scale: {
+        domain: [2000, 2026],
+        nice: false
+      },
       axis: {
-        labelAngle: 0
+        title: "Year",
+        values: [2004, 2017, 2023],
+        format: "d",
+        grid: false
       }
     },
 
     y: {
-      field: "Operators",
+      datum: 0,
       type: "quantitative",
-      title: "Number of Operators",
+      axis: null,
       scale: {
-        domain: [0, 80]
+        domain: [-1, 1]
       }
-    },
-
-    tooltip: [
-      {
-        field: "Year",
-        type: "ordinal",
-        title: "Year"
-      },
-      {
-        field: "Operators",
-        type: "quantitative",
-        title: "Recognised Operators",
-        format: ",.0f"
-      }
-    ]
+    }
   },
 
   layer: [
+
+    // Timeline
     {
       mark: {
-        type: "bar",
-        color: "#009E73",
-        size: 55,
-        cornerRadiusTopLeft: 5,
-        cornerRadiusTopRight: 5
+        type: "line",
+        color: "#b5cdd2",
+        strokeWidth: 3
       }
     },
+
+    // Proportional circles
+    {
+      mark: {
+        type: "circle",
+        color: "#009E73",
+        opacity: 0.8
+      },
+
+      encoding: {
+        size: {
+          field: "Operators",
+          type: "quantitative",
+          scale: {
+            domain: [0, 72],
+            range: [0, 5500]
+          },
+          legend: null
+        },
+
+        tooltip: [
+          {
+            field: "Year",
+            type: "quantitative",
+            title: "Year",
+            format: "d"
+          },
+          {
+            field: "Operators",
+            type: "quantitative",
+            title: "Recognised Operators",
+            format: ",.0f"
+          }
+        ]
+      }
+    },
+
+    // Operator count labels
     {
       mark: {
         type: "text",
-        dy: -10,
-        fontSize: 14,
+        dy: -48,
+        fontSize: 15,
         fontWeight: "bold",
-        color: "#073B4C"
+        color: "#073b4c"
       },
 
       encoding: {
@@ -1988,4 +2230,3 @@ draw("high-operator-chart", {
     }
   ]
 });
-

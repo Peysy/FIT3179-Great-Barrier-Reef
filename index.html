@@ -13,69 +13,13 @@
     <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
     <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f0f8fa;
-            margin: 0;
-            padding: 0;
-        }
-
-        header {
-            background-color: #073b4c;
-            color: white;
-            text-align: center;
-            padding: 60px 20px;
-        }
-
-        header h1 {
-            font-size: 42px;
-            margin-bottom: 10px;
-        }
-
-        header p {
-            font-size: 18px;
-        }
-
-        section {
-            max-width: 1100px;
-            margin: 40px auto;
-            padding: 30px;
-            background: white;
-            border-radius: 12px;
-        }
-
-        #marine-zoning-map {
-            display: flex;
-            justify-content: center;
-            overflow-x: auto;
-        }
-
-        html { scroll-behavior: smooth; }
-        body { color: #15313b; line-height: 1.65; }
-        section { box-shadow: 0 8px 35px rgba(7,59,76,.07); }
-        h2 { color: #073b4c; font-size: 27px; }
-        h3 { color: #116779; margin-top: 36px; }
-        .intro { max-width: 830px; margin: 28px auto 0; text-align: center; padding: 0 20px; }
-        .intro p { font-size: 17px; }
-        .nav { background: #0a5262; text-align: center; padding: 13px; }
-        .nav a { color: white; text-decoration: none; margin: 0 13px; font-weight: 600; }
-        .chart { overflow-x: auto; padding: 18px 0 8px; min-height: 120px; }
-        .note { border-left: 4px solid #2b9a9c; background: #eef8f8; padding: 14px 18px; border-radius: 0 7px 7px 0; }
-        .sources { font-size: 13px; color: #49646c; }
-        .stats { display: grid; grid-template-columns: repeat(auto-fit,minmax(190px,1fr)); gap: 15px; margin: 26px 0; }
-        .stat { background: #edf7f7; border-radius: 9px; padding: 17px; }
-        .stat strong { display: block; color: #087f86; font-size: 26px; }
-        .stat span { font-size: 13px; }
-        footer { text-align: center; padding: 30px; color: #4d6770; }
-        @media(max-width:600px) { section { margin: 18px 10px; padding: 19px; } header h1 { font-size: 34px; } .nav a { display:inline-block; margin: 5px 8px; } }
-    </style>
     </head>
 
     <body>
 
     <header>
-        <h1>Beneath the Surface</h1>
+      <div class="eyebrow"> AUSTRALIA · ECO-TOURISM · DATA STORY </div>
+        <h1>Beneath<br> <em>the Surface</em></h1>
         <p>Tourism and Environmental Change in the Great Barrier Reef</p>
     </header>
 
@@ -83,40 +27,35 @@
     <div class="intro"><p>How do people visit the reef region, and what does protecting this extraordinary ecosystem involve? Explore official tourism statistics alongside the Marine Park's zoning map.</p></div>
     <section id="reef">
         <h1>1. Exploring the Great Barrier Reef</h1>
-
         <p>
             The Great Barrier Reef Marine Park is divided into different
             zoning categories, each designed to manage activities and
             protect the marine environment.
         </p>
-
-        <div id="marine-zoning-map"></div>
+        <div id="marine-zoning-map" class="chart"></div>
     </section>
 
-
-    </script>
     <section id="tourism">
         <h1>2. The Reef: An Economic Lifeline</h1>
         <p>Taking a look at the <strong>tourism ventures within the Great Barrier Reef</strong> and how it contributes to the Australian economy</p>
         <p>These figures describe <strong>Tropical North Queensland</strong>, a gateway region for the Great Barrier Reef. They do <strong>not</strong> count visits to the reef itself. All statistics refer to the <strong>year ending March 2026</strong>.</p>
 
-  <h3>2.1 Industries Supported by Tourism</h3>
+        <h3>2.1.1 Industries Supported by Tourism</h3>
 
-  <p>
-    Tourism supports accommodation, transport, restaurants,
-    retail and other industries across Tropical North Queensland.
-  </p>
+        <p>
+          Tourism supports accommodation, transport, restaurants,
+          retail and other industries across Tropical North Queensland.
+        </p>
 
-  <div id="industry-support-chart"></div>
+        <div id="industry-support-chart" class="chart"></div>
 
-  <p class="note">
-    Source: Tourism Research Australia (2024–25).
-    Figures cover Tropical North Queensland tourism,
-    not exclusively Great Barrier Reef tourism.
-  </p>
-</div>
+        <p class="note">
+          Source: Tourism Research Australia (2024–25).
+          Figures cover Tropical North Queensland tourism,
+          not exclusively Great Barrier Reef tourism.
+        </p>
 
-        <h3>2.2 How Does Great Barrier Reef Tourism Support the Wider Economy?</h2>
+        <h3>2.1.2 How Does Great Barrier Reef Tourism Support the Wider Economy?</h2>
 
   <p>
     Beyond its ecological significance, the Great Barrier Reef
@@ -138,7 +77,7 @@
 
   </div>
 
-  <div id="reef-economy-chart"></div>
+  <div id="reef-economy-chart" class="chart"></div>
 
   <p class="note">
     Estimates of the direct and indirect economic contribution
@@ -147,26 +86,27 @@
   </p>
 
         <div class="stats"><div class="stat"><strong>1.75 million</strong><span>Domestic visitors</span></div><div class="stat"><strong>637,000</strong><span>International visitors</span></div><div class="stat"><strong>A$4.04 billion</strong><span>Domestic + international tourism expenditure (reported estimates)</span></div></div>
-        <h3>2.3 Who Drives Tourism Spending in Tropical North Queensland?</h3>
+        <h3>2.2 Who Drives Tourism Spending in Tropical North Queensland?</h3>
         <p>Domestic visitors account for the larger share of reported visitors. Hover over the bars for exact estimates.</p>
-        <div class="chart" id="visitor-chart"></div>
-        <h3>2.4 Which international markets are most prominent and how have their numbers changed?</h3>
+        <div id="visitor-chart" class="chart"></div>
+        <h3>2.3 Which international markets are most prominent and how have their numbers changed?</h3>
         <p>The report highlights seven individual source countries and how their numbers have changed from 2025. These are <strong>selected markets</strong>, not a complete breakdown of all international visitors.</p>
-        <div class="chart" id="origins-chart"></div>
+        <div id="origins-chart" class="chart"></div>
         <p>International arrivals increased unevenly across the listed countries. The percentages compare the year ending March 2026 with the preceding year.</p>
 
         <div class="industry-section">
 
     </section>
 
-    <section id="GBR and tourism meet">
-        <h3>3. How Have Reef Tourism Activities Changed Over Time?</h3>
+    <section id="environment">
+      <h2>3. Beneath the Surface: Environmental Change</h2>
+        <h3>3.1 How Have Reef Tourism Activities Changed Over Time?</h3>
         <p>Tourism at the Great Barrier Reef includes full-day and part-day visits, coral-viewing excursions and scenic flights. Explore how these activities have changed over time.</p>
-        <div class="chart" id="reef-tourism-chart"></div>
+        <div id="reef-tourism-chart" class="chart"></div>
         <div class="note">
         <strong>Understanding the data:</strong> These figures represent recorded commercial tourism activities at the Great Barrier Reef, rather than unique visitors. A visitor may participate in multiple activities, so the figures should not be added together to estimate total tourist numbers.</div>
         <p class="sources">Source: Australian Bureau of Statistics, Great Barrier Reef Ecosystem Accounts, 2010–11 to 2022–23.</p> 
-        <h3>When Tourism Meets the Reef</h3>
+        <h3>3.2 When Tourism Meets the Reef</h3>
 
         <p>
             Recreational diving and snorkelling can result in physical
@@ -174,7 +114,7 @@
             observed reef interactions across international dive sites.
         </p>
 
-        <div id="diver-impact-chart"></div>
+        <div id="diver-impact-chart" class="chart"></div>
 
         <p class="note">
             Source: DiverReef dataset (observations from 2004–2023).
@@ -182,7 +122,19 @@
             to the Great Barrier Reef.
         </p>
 
-  <h2>The Hidden Environmental Cost of Reef Tourism</h2>
+        <p class="chart-legend">
+  <span class="legend-item">
+    <span class="legend-dot contact-dot"></span>
+    Physical Contact
+  </span>
+
+  <span class="legend-item">
+    <span class="legend-dot damage-dot"></span>
+    Recorded Damage
+  </span>
+</p>
+
+  <h3>3.3 The Hidden Environmental Cost of Reef Tourism</h3>
 
   <p>
     While tourism contributes to regional economies,
@@ -196,7 +148,7 @@
     were unintentional or went unnoticed.
   </p>
 
-  <div id="diver-damage-chart"></div>
+  <div id="diver-damage-chart" class="chart"></div>
 
   <p class="note">
     Source: Lin et al. (2026).
@@ -206,7 +158,7 @@
 
   <div class="chart-section">
 
-  <h3>When Human Activities Threaten the Reef</h3>
+  <h3>3.4 When Human Activities Threaten the Reef</h3>
 
   <p>
     While the Great Barrier Reef supports a thriving tourism industry,
@@ -235,7 +187,7 @@
 
 <div class="chart-section">
 
-  <h3>How Is Coral Cover Changing?</h3>
+  <h3>3.5 How Is Coral Cover Changing?</h3>
 
   <p>
     Coral cover is an important indicator of reef condition.
@@ -259,9 +211,7 @@
 
 </div>
 
-  <h2>Environmental Threats</h2>
-
-  <h3>A Reef Under Pressure</h3>
+  <h3>3.6 A Reef Under Pressure</h3>
 
   <p>
     The Great Barrier Reef faces increasing environmental pressures,
@@ -310,10 +260,9 @@
     </section>
 
 
-    <section id="environment">
-      <h2>3. Beneath the Surface: Environmental Change</h2>
+    <section id="environment-hazards">
 
-  <h2>How Has Coral Cover Changed?</h2>
+  <h2>3.7 How Has Coral Cover Changed?</h2>
 
   <p>
     Coral cover declined across all three regions of the
@@ -380,51 +329,6 @@
     Annual Summary Report 2024–25.
   </p>
 
-  <!-- HIGH STANDARD TOURISM OPERATORS -->
-<div class="conservation-block">
-
-  <span class="conservation-step">04 — RESPONSIBLE TOURISM</span>
-
-  <h3>Growing Commitment to Responsible Tourism</h3>
-
-  <p>
-    Protecting the Great Barrier Reef also involves encouraging
-    environmentally responsible tourism. The Reef Authority recognises
-    High Standard Tourism Operators that meet independently certified
-    environmental standards.
-
-    The number of recognised operators increased from 19 in 2004
-    to 72 in 2023, highlighting growing participation in
-    responsible tourism practices.
-  </p>
-
-  <div class="operator-layout">
-
-    <div id="high-operator-chart" class="conservation-chart"></div>
-
-    <div class="operator-stat">
-      <span class="operator-number">63%</span>
-
-      <p>
-        of Great Barrier Reef tourists were carried by
-        High Standard Tourism Operators in 2023.
-      </p>
-    </div>
-
-  </div>
-
-  <p class="conservation-note">
-    The growth in recognised operators reflects increased participation
-    in environmental standards, but does not directly measure
-    improvements in reef health.
-  </p>
-
-  <p class="conservation-source">
-    Source: Great Barrier Reef Outlook Report 2024.
-  </p>
-
-</div>
-
   <!-- CONSERVATION SECTION -->
 <section id="conservation" class="conservation-section">
 
@@ -443,9 +347,53 @@
     </p>
   </div>
 
-  <!-- GRAPH 1 -->
   <div class="conservation-block">
-    <span class="conservation-step">01 — MONITOR</span>
+
+  <span class="conservation-step">01 — RESPONSIBLE TOURISM</span>
+
+  <h3>Growing Commitment to Responsible Tourism</h3>
+
+  <p>
+    Protecting the Great Barrier Reef also involves encouraging
+    environmentally responsible tourism. The Reef Authority recognises
+    High Standard Tourism Operators that meet independently certified
+    environmental standards.
+
+    The number of recognised operators increased from 19 in 2004
+    to 72 in 2023, highlighting growing participation in
+    responsible tourism practices.
+  </p>
+
+  <div class="operator-layout">
+
+    <div id="high-operator-chart" class="chart"></div>
+
+    <div class="operator-stat">
+      <span class="operator-number">63%</span>
+
+      <p>
+        of Great Barrier Reef tourists were carried by
+        High Standard Tourism Operators in 2023.
+      </p>
+    </div>
+
+  </div>
+
+  <p class="note">
+    The growth in recognised operators reflects increased participation
+    in environmental standards, but does not directly measure
+    improvements in reef health.
+  </p>
+
+  <p class="conservation-source">
+    Source: Great Barrier Reef Outlook Report 2024.
+  </p>
+
+</div>
+
+
+  <div class="conservation-block">
+    <span class="conservation-step">02 — MONITOR</span>
 
     <h3>Keeping an Eye on the Reef</h3>
 
@@ -456,18 +404,17 @@
       changes in coral health and identify potential threats.
     </p>
 
-    <div id="monitoring-chart" class="conservation-chart"></div>
+    <div id="monitoring-chart" class="chart"></div>
 
-    <p class="conservation-note">
+    <p class="note">
       Survey counts are divided by the number of months in each
       reporting period to make comparisons more meaningful.
       Missing data does not indicate zero activity.
     </p>
   </div>
 
-  <!-- GRAPH 2 -->
   <div class="conservation-block">
-    <span class="conservation-step">02 — PROTECT</span>
+    <span class="conservation-step">03 — PROTECT</span>
 
     <h3>Responding to Coral Predators</h3>
 
@@ -477,18 +424,18 @@
       through targeted removal activities.
     </p>
 
-    <div id="predator-chart" class="conservation-chart"></div>
+    <div id="predator-chart" class="chart"></div>
 
-    <p class="conservation-note">
+    <p class="note">
       These figures represent reported predator removals,
       not the total predator population or direct improvements
       in reef health.
     </p>
   </div>
 
-  <!-- GRAPH 3 -->
+
   <div class="conservation-block">
-    <span class="conservation-step">03 — RESTORE</span>
+    <span class="conservation-step">04 — RESTORE</span>
 
     <h3>Helping Coral Recover</h3>
 
@@ -498,9 +445,9 @@
       One activity involves planting coral fragments at selected reef sites.
     </p>
 
-    <div id="recovery-chart" class="conservation-chart"></div>
+    <div id="recovery-chart" class="chart"></div>
 
-    <p class="conservation-note">
+    <p class="note">
       Coral fragments planted represent restoration activity.
       They do not indicate how many fragments successfully survived.
     </p>
@@ -509,12 +456,7 @@
 </section>
 
     </section>
-    <section id="takeaways">
-<!-- ==========================================
-     HOW TOURISTS CAN HELP
-========================================== -->
-
-<section id="tourist-actions" class="tourist-actions-section">
+    <section id="takeaways" class="tourist-actions-section">
 
   <div class="section-heading">
     <span class="section-label">05 — TAKE ACTION</span>
@@ -531,7 +473,7 @@
 
   <div class="tourist-action-grid">
 
-    <!-- CARD 1 -->
+
     <div class="tourist-action-card">
 
       <div class="action-icon">🌿</div>
@@ -554,7 +496,7 @@
 
     </div>
 
-    <!-- CARD 2 -->
+
     <div class="tourist-action-card">
 
       <div class="action-icon">📱</div>
@@ -578,7 +520,7 @@
 
     </div>
 
-    <!-- CARD 3 -->
+
     <div class="tourist-action-card">
 
       <div class="action-icon">🐠</div>
@@ -604,12 +546,6 @@
 
   </div>
 
-</section>
-
-
-<!-- ==========================================
-     FINAL CONCLUSION
-========================================== -->
 
 <section id="reef-conclusion" class="reef-conclusion-section">
 
